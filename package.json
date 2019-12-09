@@ -1,0 +1,26 @@
+{
+  "name": "@les/utils",
+  "version": "0.0.1",
+  "description": "Utilities used by lesky",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/richardeschloss/les-utils.git"
+  },
+  "keywords": [
+    "lesky",
+    "les",
+    "utils",
+    "koajs",
+    "expressjs"
+  ],
+  "author": "Richard Schloss",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/richardeschloss/les-utils/issues"
+  },
+  "homepage": "https://github.com/richardeschloss/les-utils#readme"
+}
