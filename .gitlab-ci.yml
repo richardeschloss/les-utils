@@ -19,10 +19,11 @@ cache:
 
 test_les:
   script:
+    - echo $SOMEVAR
     - apt-get update
     - apt-get install -y net-tools xdg-utils
     - npm install
-    - npm run test:unit
+    - SOMEVAR=$SOMEVAR npm run test:unit
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   artifacts:
     paths:
