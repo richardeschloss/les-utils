@@ -23,4 +23,4 @@ test_envvars:
     - echo $K8S_SECRET_SOMEVAR
     - echo $K8S_SECRET_VAR2
     - echo $MYTEST
-    - SOMEVAR=$SOMEVAR K8S_SECRET_VAR2=$K8S_SECRET_VAR2 node echoVars.js
+    - node echoVars.js --s1=$SOMEVAR --s2=$K8S_SECRET_VAR2 $MYTEST
