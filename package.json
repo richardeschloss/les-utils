@@ -1,5 +1,5 @@
 {
-  "name": "@les/utils",
+  "name": "les-utils",
   "version": "0.0.1",
   "description": "Utilities used by lesky",
   "main": "index.js",
