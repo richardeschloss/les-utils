@@ -14,6 +14,10 @@
     "test:unit:cov": "TEST=specs nyc ava --config unit.config.js --colors",
     "test:cov:watch": "TEST=specs nyc ava --watch"
   },
+  "files": [
+    "index.js",
+    "utils"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/richardeschloss/les-utils.git"
