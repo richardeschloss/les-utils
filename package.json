@@ -1,11 +1,11 @@
 {
   "name": "les-utils",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Utilities used by lesky",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec babel-node index.js",
-    "build": "babel index.js utils -d dist",
+    "build": "babel src -d dist",
     "test:cov": "npm run test:unit:cov && npm run test:e2e:cov",
     "test:watch": "TEST=specs ava --watch",
     "test:e2e:watch": "ava --config e2e.config.js --colors --watch",

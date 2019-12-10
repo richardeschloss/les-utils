@@ -17,7 +17,11 @@ const yandexRexter = (0, _rexter.default)({
 const {
   K8S_SECRET_YANDEX_TRANSLATE: API_KEY_BASE64
 } = process.env;
-const API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString();
+let API_KEY;
+
+if (API_KEY_BASE64) {
+  API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString();
+}
 
 function getSupportedLangs({
   ui = 'en'
