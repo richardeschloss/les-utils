@@ -22,5 +22,25 @@
   "bugs": {
     "url": "https://github.com/richardeschloss/les-utils/issues"
   },
-  "homepage": "https://github.com/richardeschloss/les-utils#readme"
+  "homepage": "https://github.com/richardeschloss/les-utils#readme",
+  "dependencies": {
+    "bl": "^1.2.1",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/node": "^7.6.3",
+    "@babel/preset-env": "^7.6.3",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "node-netstat": "^1.8.0",
+    "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "ava": "^2.4.0",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.5.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "nodemon": "^1.19.4",
+    "nyc": "^14.1.1",
+    "prettier": "^1.19.1"
+  }
 }
