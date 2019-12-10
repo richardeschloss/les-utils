@@ -1,5 +1,5 @@
 import test from 'ava'
-import { getSupportedLangs, translateText } from '@/utils'
+import { getSupportedLangs, translateText } from '@/utils/language'
 
 test.only('ENV Var check', (t) => {
   console.log('somevar is', process.env.SOMEVAR)

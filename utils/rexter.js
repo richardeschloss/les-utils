@@ -155,7 +155,7 @@ export default function Rexter(cfg) {
   }
 
   function post({ host, path, postData }) {
-    const reqOptions = { host, path, postData, method: 'POST' })
+    const reqOptions = { host, path, postData, method: 'POST' }
     return request(reqOptions)
   }
 
