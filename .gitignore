@@ -1,2 +1,4 @@
 node_modules
 .yandex.json
+.nyc_output
+coverage
