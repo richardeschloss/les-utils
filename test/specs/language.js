@@ -1,11 +1,6 @@
 import test from 'ava'
 import { getSupportedLangs, translateText } from '@/utils/language'
 
-test.only('ENV Var check', (t) => {
-  console.log('somevar is', process.env.SOMEVAR)
-  t.is(process.env.SOMEVAR, 'abc123456')
-})
-
 test('Translate text', async (t) => {
   const resp = await translateText({
     text: 'Hello world!',

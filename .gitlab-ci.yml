@@ -17,10 +17,11 @@ cache:
   paths:
     - node_modules/
 
-test_envvars:
+test_utils:
   script:
-    - echo $SOMEVAR
-    - echo $K8S_SECRET_SOMEVAR
-    - echo $K8S_SECRET_VAR2
-    - echo $MYTEST
-    - node echoVars.js --s1=$SOMEVAR --s2=$K8S_SECRET_VAR2 $MYTEST
+    - npm install
+    - npm run test:unit
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    paths:
+      - coverage

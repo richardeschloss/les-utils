@@ -3,7 +3,8 @@ import Rexter from '@/utils/rexter'
 const yandexRexter = Rexter({
   hostname: 'translate.yandex.net'
 })
-const { API_KEY } = process.env
+const { K8S_SECRET_YANDEX_TRANSLATE: API_KEY_BASE64 } = process.env
+const API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString()
 
 function getSupportedLangs({ ui = 'en' }) {
   const postData = {
@@ -12,7 +13,8 @@ function getSupportedLangs({ ui = 'en' }) {
   }
   return yandexRexter.post({
     path: '/api/v1.5/tr.json/getLangs',
-    postData
+    postData,
+    outputFmt: 'json'
   })
 }
 
@@ -24,7 +26,8 @@ function translateText({ text, lang }) {
   }
   return yandexRexter.post({
     path: '/api/v1.5/tr.json/translate',
-    postData
+    postData,
+    outputFmt: 'json'
   })
 }
 

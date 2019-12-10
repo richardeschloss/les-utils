@@ -9,6 +9,9 @@ import { URL as ParseUrl } from 'url'
 import { createGunzip } from 'zlib'
 import { camelCase, parseXML } from '@/utils/string'
 import { promiseEach, promiseSeries } from '@/utils/promises'
+import Debug from 'debug'
+
+const debug = Debug('utils:rexter')
 
 /* Constants */
 const httpAgent = new Agent({
@@ -123,7 +126,7 @@ export default function Rexter(cfg) {
     const batchMethod = sequential ? promiseSeries : promiseEach
     return batchMethod({
       items: collection,
-      async handleItem(item) {
+      handleItem(item) {
         reqOptions.path = pathTemplate.replace(replaceToken, item)
         // .replace(replaceToken.toLowerCase(), item.toLowerCase())
 
@@ -140,7 +143,6 @@ export default function Rexter(cfg) {
         }
 
         return request(reqOptions).catch((err) => {
-          debug('Err occurred', err)
           return { item }
         })
       },
@@ -154,8 +156,8 @@ export default function Rexter(cfg) {
     return request(reqOptions)
   }
 
-  function post({ host, path, postData }) {
-    const reqOptions = { host, path, postData, method: 'POST' }
+  function post({ path, postData, ...options }) {
+    const reqOptions = Object.assign({ path, postData, method: 'POST' }, options)
     return request(reqOptions)
   }
 
@@ -211,8 +213,10 @@ export default function Rexter(cfg) {
 
     if (method === 'POST') {
       if (postData) {
-        const stringifier =
-          stringifiers[optsCopy.headers['Content-Type']] || stringify
+        if (!optsCopy.headers['Content-Type']) {
+          optsCopy.headers['Content-Type'] = 'application/x-www-form-urlencoded' 
+        }
+        const stringifier = stringifiers[optsCopy.headers['Content-Type']]
         postStr = stringifier(postData)
         optsCopy.headers['Content-Length'] = postStr.length
       } else if (postStr) {
