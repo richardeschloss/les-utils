@@ -17,14 +17,9 @@ cache:
   paths:
     - node_modules/
 
-test_les:
+test_envvars:
   script:
     - echo $SOMEVAR
-    - apt-get update
-    - apt-get install -y net-tools xdg-utils
-    - npm install
-    - SOMEVAR=$SOMEVAR npm run test:unit
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  artifacts:
-    paths:
-      - coverage
+    - echo $K8S_SECRET_SOMEVAR
+    - echo $MYTEST
+    - node echoVars.js
