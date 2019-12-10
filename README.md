@@ -4,7 +4,7 @@ Status: not exactly ready for public consumption.
 
 ## Current utilities:
 
-1. Rexter: Like a good dog, requests things...sometimes in batch. Promise-based.
+1. Rexter: Like a good dog, fetches and requests things...sometimes in batch. Promise-based.
 
 2. Language: 
 - Gets a list of supported languages from Yandex Translate API
