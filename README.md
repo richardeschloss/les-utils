@@ -14,3 +14,7 @@ Status: not exactly ready for public consumption.
 - ParseXML (promise-based)
 - Camelcase
 - Startcase 
+
+4. Promises:
+- PromiseEach (like `async.each` but promise-based)
+- PromiseSeries (like `async.series` but promise-based)
