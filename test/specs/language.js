@@ -1,5 +1,5 @@
 import test from 'ava'
-import { getSupportedLangs, translateText } from '@/utils/language'
+import { getSupportedLangs, translateText } from '@/src/language'
 
 test('Translate text', async (t) => {
   const resp = await translateText({

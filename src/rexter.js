@@ -7,8 +7,8 @@ import { parse as parseCookie } from 'cookie'
 import { stringify } from 'querystring'
 import { URL as ParseUrl } from 'url'
 import { createGunzip } from 'zlib'
-import { camelCase, parseXML } from '@/utils/string'
-import { promiseEach, promiseSeries } from '@/utils/promises'
+import { parseXML } from './string'
+import { promiseEach, promiseSeries } from './promises'
 import Debug from 'debug'
 
 const debug = Debug('utils:rexter')
@@ -47,7 +47,8 @@ export default function Rexter(cfg) {
   let _cookies
   let _parsedCookies = []
   const _defaultHeaders = {
-    Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    Accept:
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
     'Accept-Encoding': 'gzip, deflate, sdch, br',
     'Accept-Language': 'en-US,en;q=0.8',
     Connection: 'keep-alive',
@@ -157,7 +158,10 @@ export default function Rexter(cfg) {
   }
 
   function post({ path, postData, ...options }) {
-    const reqOptions = Object.assign({ path, postData, method: 'POST' }, options)
+    const reqOptions = Object.assign(
+      { path, postData, method: 'POST' },
+      options
+    )
     return request(reqOptions)
   }
 
@@ -214,7 +218,7 @@ export default function Rexter(cfg) {
     if (method === 'POST') {
       if (postData) {
         if (!optsCopy.headers['Content-Type']) {
-          optsCopy.headers['Content-Type'] = 'application/x-www-form-urlencoded' 
+          optsCopy.headers['Content-Type'] = 'application/x-www-form-urlencoded'
         }
         const stringifier = stringifiers[optsCopy.headers['Content-Type']]
         postStr = stringifier(postData)

@@ -1,10 +1,14 @@
-import Rexter from '@/utils/rexter'
+import Rexter from './rexter'
 
 const yandexRexter = Rexter({
   hostname: 'translate.yandex.net'
 })
 const { K8S_SECRET_YANDEX_TRANSLATE: API_KEY_BASE64 } = process.env
-const API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString()
+
+let API_KEY
+if (API_KEY_BASE64) {
+  API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString()
+}
 
 function getSupportedLangs({ ui = 'en' }) {
   const postData = {
