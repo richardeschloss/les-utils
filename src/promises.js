@@ -1,4 +1,4 @@
-export function promiseEach(opts) {
+function promiseEach(opts) {
   const { items = [], groupBy, handleItem, transform, notify } = opts
   const nItems = items.length
   let doneCnt = 0
@@ -31,7 +31,7 @@ export function promiseEach(opts) {
   })
 }
 
-export function promiseSeries(opts) {
+function promiseSeries(opts) {
   const { items = [], handleItem, transform, notify } = opts
   let doneCnt = 0
   const nItems = items.length
@@ -54,7 +54,4 @@ export function promiseSeries(opts) {
   })
 }
 
-export default {
-  promiseEach,
-  promiseSeries
-}
+export { promiseEach, promiseSeries }

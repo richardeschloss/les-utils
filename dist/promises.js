@@ -5,7 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.promiseEach = promiseEach;
 exports.promiseSeries = promiseSeries;
-exports.default = void 0;
 
 function promiseEach(opts) {
   const {
@@ -83,9 +82,3 @@ function promiseSeries(opts) {
     })();
   });
 }
-
-var _default = {
-  promiseEach,
-  promiseSeries
-};
-exports.default = _default;

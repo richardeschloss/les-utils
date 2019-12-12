@@ -5,7 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getSupportedLangs = getSupportedLangs;
 exports.translateText = translateText;
-exports.default = void 0;
 
 var _rexter = _interopRequireDefault(require("./rexter"));
 
@@ -52,9 +51,3 @@ function translateText({
     outputFmt: 'json'
   });
 }
-
-var _default = {
-  getSupportedLangs,
-  translateText
-};
-exports.default = _default;

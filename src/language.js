@@ -36,5 +36,3 @@ function translateText({ text, lang }) {
 }
 
 export { getSupportedLangs, translateText }
-
-export default { getSupportedLangs, translateText }
