@@ -1,8 +1,8 @@
 import test from 'ava'
-import { getSupportedLangs, translateText } from '@/src/language'
+import { getSupportedLangs, translateText, translateMany } from '@/src/language'
 
 test('Supported languages (ibm)', async (t) => {
-  const { languages: langs } = await getSupportedLangs({ svc: 'ibm' })
+  const langs = await getSupportedLangs({ svc: 'ibm' })
   console.log('Langs (IBM)', langs)
   t.true(langs.length > 0)
   t.pass()
@@ -17,9 +17,13 @@ test('Supported languages (yandex)', async (t) => {
 })
 
 test('Translate text (ibm)', async (t) => {
-  const { translations } = await translateText({
+  const lang = 'es'
+  const translations = await translateText({
     text: 'Hello world!',
-    lang: 'es'
+    lang
+  }).catch((err) => {
+    console.error(err.message)
+    t.fail()
   })
 
   const [{ translation }] = translations
@@ -38,4 +42,16 @@ test('Translate text (yandex)', async (t) => {
   console.log('Translation (yandex)', text)
   t.is(text[0], 'Hola mundo!')
   t.is(lang, 'en-es')
+})
+
+test('Translate Many', async (t) => {
+  const resp = await translateMany({
+    texts: ['hello', 'world'],
+    langs: ['es', 'fr', 'he'], // 'all'
+    notify({ lang, result }) {
+      console.log(lang, result)
+    }
+  })
+  console.log('resp', resp)
+  t.pass()
 })

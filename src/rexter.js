@@ -210,6 +210,7 @@ export default function Rexter(cfg) {
       hostname,
       port
     }
+
     const protoObj = proto === 'https' ? https : http
     Object.assign(optsCopy, reqOptions)
     Object.assign(optsCopy.headers, reqOptions.headers)

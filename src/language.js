@@ -1,5 +1,6 @@
 import { parse as UrlParse } from 'url'
 import Rexter from './rexter'
+import { promiseEach, promiseSeries } from './promises'
 
 const {
   K8S_SECRET_YANDEX_TRANSLATE: YANDEX_API_KEY_BASE64,
@@ -33,7 +34,8 @@ const supportLangs = {
       url: `${WATSON_ENDPOINT}/v3/identifiable_languages?version=2018-05-01`,
       options: {
         auth: `apikey:${WATSON_API_KEY}`,
-        outputFmt: 'json'
+        outputFmt: 'json',
+        transform: ({ languages }) => languages
       }
     })
   },
@@ -54,18 +56,23 @@ const supportLangs = {
 const translate = {
   ibm({ text, lang, fromLang = 'en' }) {
     const postData = {
-      text, //: ['Hello world'],
+      text, // Can be [String] or String
       model_id: `${fromLang}-${lang}`
     }
-    return ibmRexter.post({
-      path: `${ibmUrlParsed.path}/v3/translate?version=2018-05-01`,
-      postData,
-      auth: `apikey:${WATSON_API_KEY}`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      outputFmt: 'json'
-    })
+    return ibmRexter
+      .post({
+        path: `${ibmUrlParsed.path}/v3/translate?version=2018-05-01`,
+        postData,
+        auth: `apikey:${WATSON_API_KEY}`,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        outputFmt: 'json',
+        transform: ({ translations }) => translations
+      })
+      .catch(() => {
+        throw new Error(`Error translating to lang ${lang}.`)
+      })
   },
   yandex({ text, lang }) {
     const postData = {
@@ -81,12 +88,41 @@ const translate = {
   }
 }
 
+const translateBatch = {
+  async ibm({ texts = [], langs = [], notify, requestStyle = 'each' }) {
+    if (langs === 'all') {
+      langs = (await getSupportedLangs({})).map(({ language }) => language)
+    }
+    console.log('translating for langs', langs)
+    const promiseFn = requestStyle === 'each' ? promiseEach : promiseSeries
+    return promiseFn({
+      items: langs,
+      handleItem: (lang) =>
+        translate
+          .ibm({ text: texts, lang })
+          .then((resp) => resp.map(({ translation }) => translation)),
+      notify({ data }) {
+        const { err, item: lang, resp: result } = data
+        if (err) {
+          console.error(err.message)
+        } else {
+          notify({ lang, result })
+        }
+      }
+    })
+  }
+}
+
 function getSupportedLangs({ svc = 'ibm' }) {
   return supportLangs[svc]({})
+}
+
+function translateMany({ svc = 'ibm', ...args }) {
+  return translateBatch[svc](args)
 }
 
 function translateText({ svc = 'ibm', ...args }) {
   return translate[svc](args)
 }
 
-export { getSupportedLangs, translateText }
+export { getSupportedLangs, translateMany, translateText }

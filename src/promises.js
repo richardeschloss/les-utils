@@ -3,13 +3,26 @@ function promiseEach(opts) {
   const nItems = items.length
   let doneCnt = 0
   let out = {}
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     items.forEach(async (item, itemIdx) => {
-      const resp = await handleItem(item, itemIdx).catch(reject)
-      if (groupBy) {
-        out[item[groupBy]] = resp
-      } else if (typeof item === 'string') {
-        out[item] = resp
+      const resp = await handleItem(item, itemIdx).catch((err) => {
+        if (notify) {
+          notify({
+            evt: 'promiseEachErr',
+            data: {
+              err,
+              item
+            }
+          })
+        }
+      })
+
+      if (resp) {
+        if (groupBy) {
+          out[item[groupBy]] = resp
+        } else if (typeof item === 'string') {
+          out[item] = resp
+        }
       }
 
       doneCnt++
@@ -17,10 +30,10 @@ function promiseEach(opts) {
         notify({
           evt: 'promiseEachProgress',
           data: {
-            progress: doneCnt / nItems,
             resp,
             item
-          }
+          },
+          progress: doneCnt / nItems
         })
       }
       if (doneCnt === nItems) {
@@ -40,10 +53,27 @@ function promiseSeries(opts) {
     ;(async function handleNext() {
       const itemIdx = doneCnt
       const item = items[itemIdx]
-      const resp = await handleItem(item, itemIdx)
+      const resp = await handleItem(item, itemIdx).catch((err) => {
+        if (notify) {
+          notify({
+            evt: 'promiseSeriesErr',
+            data: {
+              err,
+              item
+            }
+          })
+        }
+      })
       out[item] = resp
       doneCnt++
-      if (notify) notify({ progress: doneCnt / nItems, resp, item })
+      if (notify) {
+        notify({
+          evt: 'promiseEachProgress',
+          data: { resp, item },
+          progress: doneCnt / nItems
+        })
+      }
+
       if (doneCnt === nItems) {
         if (transform) out = transform(out)
         resolve(out)
