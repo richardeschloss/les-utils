@@ -44,10 +44,10 @@ test('Translate text (yandex)', async (t) => {
   t.is(lang, 'en-es')
 })
 
-test('Translate Many', async (t) => {
+test.only('Translate Many', async (t) => {
   const resp = await translateMany({
     texts: ['hello', 'world'],
-    langs: ['es', 'fr', 'he'], // 'all'
+    langs: ['es', 'fr', 'he', 'ar', 'af'], // 'all'
     notify({ lang, result }) {
       console.log(lang, result)
     }

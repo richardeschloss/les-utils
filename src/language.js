@@ -94,6 +94,7 @@ const translateBatch = {
       langs = (await getSupportedLangs({})).map(({ language }) => language)
     }
     console.log('translating for langs', langs)
+    const failedLangs = []
     const promiseFn = requestStyle === 'each' ? promiseEach : promiseSeries
     return promiseFn({
       items: langs,
@@ -105,10 +106,12 @@ const translateBatch = {
         const { err, item: lang, resp: result } = data
         if (err) {
           console.error(err.message)
+          failedLangs.push(lang)
         } else {
           notify({ lang, result })
         }
-      }
+      },
+      transform: (out) => ({ out, failedLangs })
     })
   }
 }
