@@ -47,7 +47,7 @@ test('Translate text (yandex)', async (t) => {
 test.only('Translate Many', async (t) => {
   const resp = await translateMany({
     texts: ['hello', 'world'],
-    langs: ['es', 'fr', 'he', 'ar', 'af'], // 'all'
+    langs: ['es', 'fr', 'he', 'ar'], // 'all'
     notify({ lang, result }) {
       console.log(lang, result)
     }

@@ -27,15 +27,30 @@ const ibmRexter = Rexter({
   hostname: ibmUrlParsed.hostname
 })
 
-const supportLangs = {
-  ibm() {
-    console.log('getting supported langs from IBM')
+const identifiableLanguages = {
+  ibm({}) {
     return ibmRexter.get({
       url: `${WATSON_ENDPOINT}/v3/identifiable_languages?version=2018-05-01`,
       options: {
         auth: `apikey:${WATSON_API_KEY}`,
+        outputFmt: 'json'
+      }
+    })
+  }
+}
+
+const supportLangs = {
+  ibm({ src = 'en' }) {
+    console.log('getting supported langs from IBM')
+    return ibmRexter.get({
+      url: `${WATSON_ENDPOINT}/v3/models?version=2018-05-01`,
+      options: {
+        auth: `apikey:${WATSON_API_KEY}`,
         outputFmt: 'json',
-        transform: ({ languages }) => languages
+        transform: ({ models }) =>
+          models
+            .filter(({ source }) => source === src)
+            .map(({ target }) => target)
       }
     })
   },
@@ -54,10 +69,10 @@ const supportLangs = {
 }
 
 const translate = {
-  ibm({ text, lang, fromLang = 'en' }) {
+  ibm({ text, lang, src = 'en' }) {
     const postData = {
       text, // Can be [String] or String
-      model_id: `${fromLang}-${lang}`
+      model_id: `${src}-${lang}`
     }
     return ibmRexter
       .post({
@@ -91,7 +106,7 @@ const translate = {
 const translateBatch = {
   async ibm({ texts = [], langs = [], notify, requestStyle = 'each' }) {
     if (langs === 'all') {
-      langs = (await getSupportedLangs({})).map(({ language }) => language)
+      langs = await getSupportedLangs({})
     }
     console.log('translating for langs', langs)
     const failedLangs = []
@@ -128,4 +143,9 @@ function translateText({ svc = 'ibm', ...args }) {
   return translate[svc](args)
 }
 
-export { getSupportedLangs, translateMany, translateText }
+export {
+  getSupportedLangs,
+  identifiableLanguages,
+  translateMany,
+  translateText
+}

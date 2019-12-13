@@ -184,12 +184,14 @@ function Rexter(cfg) {
   }) {
     const {
       pathname: path,
-      hostname
+      hostname,
+      search
     } = new _url.URL(url);
     const reqOptions = Object.assign({
       path,
       hostname
     }, options);
+    reqOptions.path += search;
     return request(reqOptions);
   }
 
