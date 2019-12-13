@@ -4,8 +4,18 @@ import Rexter from './rexter'
 const {
   K8S_SECRET_YANDEX_TRANSLATE: YANDEX_API_KEY_BASE64,
   K8S_SECRET_WATSON_TRANSLATE: WATSON_API_KEY_BASE64,
-  WATSON_ENDPOINT
+  K8S_SECRET_WATSON_ENDPOINT1: WATSON_ENDPOINT1_BASE64
 } = process.env
+
+let YANDEX_API_KEY, WATSON_API_KEY, WATSON_ENDPOINT
+if (YANDEX_API_KEY_BASE64) {
+  YANDEX_API_KEY = Buffer.from(YANDEX_API_KEY_BASE64, 'base64').toString()
+}
+
+if (WATSON_API_KEY_BASE64 && WATSON_ENDPOINT1_BASE64) {
+  WATSON_API_KEY = Buffer.from(WATSON_API_KEY_BASE64, 'base64').toString()
+  WATSON_ENDPOINT = Buffer.from(WATSON_ENDPOINT1_BASE64, 'base64').toString()
+}
 
 const yandexRexter = Rexter({
   hostname: 'translate.yandex.net'
@@ -15,12 +25,6 @@ const ibmUrlParsed = UrlParse(WATSON_ENDPOINT)
 const ibmRexter = Rexter({
   hostname: ibmUrlParsed.hostname
 })
-
-let YANDEX_API_KEY, WATSON_API_KEY
-if (YANDEX_API_KEY_BASE64) {
-  YANDEX_API_KEY = Buffer.from(YANDEX_API_KEY_BASE64, 'base64').toString()
-  WATSON_API_KEY = Buffer.from(WATSON_API_KEY_BASE64, 'base64').toString()
-}
 
 const supportLangs = {
   ibm() {
