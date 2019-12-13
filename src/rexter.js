@@ -152,8 +152,9 @@ export default function Rexter(cfg) {
   }
 
   function get({ url, options }) {
-    const { pathname: path, hostname } = new ParseUrl(url)
+    const { pathname: path, hostname, search } = new ParseUrl(url)
     const reqOptions = Object.assign({ path, hostname }, options)
+    reqOptions.path += search
     return request(reqOptions)
   }
 
@@ -162,6 +163,7 @@ export default function Rexter(cfg) {
       { path, postData, method: 'POST' },
       options
     )
+
     return request(reqOptions)
   }
 
