@@ -61,12 +61,30 @@ const outputFmts = {
 /* Exports */
 
 function Rexter(cfg) {
+  const _cfg = Object.assign({}, cfg);
+
+  if (_cfg.url) {
+    const {
+      hostname,
+      port,
+      proto,
+      path: basePath
+    } = (0, _url.parse)(_cfg.url);
+    Object.assign(_cfg, {
+      hostname,
+      port,
+      proto,
+      basePath
+    });
+  }
+
   const {
     family = 4,
     proto = 'https',
     hostname = '',
-    port = 443
-  } = cfg;
+    port = 443,
+    auth
+  } = _cfg;
   const agent = proto === 'https' ? httpsAgent : httpAgent;
 
   let _cookies;
@@ -114,100 +132,6 @@ function Rexter(cfg) {
     _cookies = cookies;
   }
 
-  function formatResp(response, outputFmt) {
-    if (outputFmts[outputFmt]) {
-      return outputFmts[outputFmt](response);
-    } else {
-      return response;
-    }
-  }
-
-  function batchRequests(info = {}) {
-    const {
-      iteratee = 'items',
-      method,
-      headers,
-      pathTemplate,
-      postDataTemplate,
-      transform,
-      sequential,
-      outputFmt
-    } = info;
-    let {
-      replaceToken = '[ITEM]'
-    } = info;
-    const collection = info[iteratee];
-    const reqOptions = {
-      method,
-      path: info.path,
-      outputFmt,
-      headers,
-      transform
-    };
-    let stringifier = _querystring.stringify;
-
-    if (postDataTemplate) {
-      stringifier = stringifiers[reqOptions.headers['Content-Type']];
-      reqOptions.postStrTemplate = stringifier(postDataTemplate);
-      reqOptions.method = 'POST';
-    }
-
-    const batchMethod = sequential ? _promises.promiseSeries : _promises.promiseEach;
-    return batchMethod({
-      items: collection,
-
-      handleItem(item) {
-        reqOptions.path = pathTemplate.replace(replaceToken, item); // .replace(replaceToken.toLowerCase(), item.toLowerCase())
-
-        if (reqOptions.postStrTemplate) {
-          if (reqOptions.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
-            replaceToken = encodeURIComponent(replaceToken);
-          }
-
-          reqOptions.postStr = reqOptions.postStrTemplate.replace(replaceToken, item).replace(replaceToken.toLowerCase(), item.toLowerCase());
-        }
-
-        return request(reqOptions).catch(err => {
-          return {
-            item
-          };
-        });
-      },
-
-      transform: resp => collection.map(item => resp[item])
-    });
-  }
-
-  function get({
-    url,
-    options
-  }) {
-    const {
-      pathname: path,
-      hostname,
-      search
-    } = new _url.URL(url);
-    const reqOptions = Object.assign({
-      path,
-      hostname
-    }, options);
-    reqOptions.path += search;
-    return request(reqOptions);
-  }
-
-  function post({
-    path,
-    postData,
-    ...options
-  }) {
-    const reqOptions = Object.assign({
-      path,
-      postData,
-      method: 'POST'
-    }, options);
-    return request(reqOptions);
-  }
-
   function downloadFile({
     url,
     dest,
@@ -239,9 +163,57 @@ function Rexter(cfg) {
     });
   }
 
+  function formatResp(response, outputFmt) {
+    if (outputFmts[outputFmt]) {
+      return outputFmts[outputFmt](response);
+    } else {
+      return response;
+    }
+  }
+
+  function get({
+    path,
+    url,
+    options
+  }) {
+    const reqOptions = Object.assign({
+      path
+    }, options);
+
+    if (url) {
+      const {
+        pathname: path,
+        hostname,
+        search
+      } = (0, _url.parse)(url);
+      Object.assign(reqOptions, {
+        path: path + search,
+        hostname,
+        search,
+        prependPath: false
+      });
+    }
+
+    return request(reqOptions);
+  }
+
+  function post({
+    path,
+    postData,
+    ...options
+  }) {
+    const reqOptions = Object.assign({
+      path,
+      postData,
+      method: 'POST'
+    }, options);
+    return request(reqOptions);
+  }
+
   function request(reqOptions) {
     const {
       postData,
+      prependPath = true,
       method = 'GET',
       notify,
       outputFmt,
@@ -250,8 +222,12 @@ function Rexter(cfg) {
     let {
       postStr
     } = reqOptions;
+    const {
+      basePath
+    } = _cfg;
     reqOptions.headers = Object.assign({}, _defaultHeaders, reqOptions.headers);
     const optsCopy = {
+      auth,
       agent,
       family,
       hostname,
@@ -277,6 +253,10 @@ function Rexter(cfg) {
       } else if (postStr) {
         optsCopy.headers['Content-Length'] = postStr.length;
       }
+    }
+
+    if (basePath && prependPath) {
+      optsCopy.path = `${basePath}${optsCopy.path}`;
     }
 
     return new Promise((resolve, reject) => {
@@ -341,14 +321,80 @@ function Rexter(cfg) {
     });
   }
 
+  function requestMany(info = {}) {
+    const {
+      iteratee = 'items',
+      method,
+      headers = {},
+      notify,
+      pathTemplate,
+      postDataTemplate,
+      transform,
+      sequential,
+      outputFmt
+    } = info;
+    const {
+      replaceToken = '[ITEM]'
+    } = info;
+    const collection = info[iteratee];
+    const reqOptions = {
+      method,
+      path: info.path,
+      outputFmt,
+      headers,
+      transform
+    };
+    let stringifier = _querystring.stringify;
+
+    if (postDataTemplate) {
+      if (!reqOptions.headers['Content-Type']) {
+        reqOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      }
+
+      stringifier = stringifiers[reqOptions.headers['Content-Type']];
+      reqOptions.postStrTemplate = stringifier(postDataTemplate);
+      reqOptions.method = 'POST';
+    }
+
+    const batchMethod = sequential ? _promises.PromiseUtils.series : _promises.PromiseUtils.each;
+    return batchMethod({
+      items: collection,
+
+      handleItem(item) {
+        let replaceTokenCopy = replaceToken;
+
+        if (pathTemplate) {
+          reqOptions.path = pathTemplate.replace(replaceToken, item);
+        }
+
+        if (reqOptions.postStrTemplate) {
+          if (reqOptions.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
+            replaceTokenCopy = encodeURIComponent(replaceToken);
+          }
+
+          reqOptions.postStr = reqOptions.postStrTemplate.replace(replaceTokenCopy, item).replace(replaceTokenCopy.toLowerCase(), item.toLowerCase());
+        }
+
+        return request(reqOptions).catch(err => {
+          console.error('Error requesting item', item, err);
+          return {
+            item
+          };
+        });
+      },
+
+      notify
+    });
+  }
+
   return Object.freeze({
-    batchRequests,
     cookiesValid,
     getCookies,
     setCookies,
+    downloadFile,
     get,
     post,
-    downloadFile,
-    request
+    request,
+    requestMany
   });
 }
