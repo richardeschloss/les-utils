@@ -1,40 +1,19 @@
-import Rexter from './rexter'
+import { Svc as ibm } from '@/src/rexters/ibm'
+import { Svc as yandex } from '@/src/rexters/yandex'
 
-const yandexRexter = Rexter({
-  hostname: 'translate.yandex.net'
-})
-const { K8S_SECRET_YANDEX_TRANSLATE: API_KEY_BASE64 } = process.env
-
-let API_KEY
-if (API_KEY_BASE64) {
-  API_KEY = Buffer.from(API_KEY_BASE64, 'base64').toString()
+const rexters = {
+  ibm,
+  yandex
 }
 
-function getSupportedLangs({ ui = 'en' }) {
-  const postData = {
-    key: API_KEY,
-    ui
+function LangUtils({ api = 'ibm' }) {
+  if (!rexters[api]) {
+    throw new Error(`svc ${api} not implemented`)
   }
-  return yandexRexter.post({
-    path: '/api/v1.5/tr.json/getLangs',
-    postData,
-    outputFmt: 'json'
-  })
+
+  const out = rexters[api]
+  /* Custom extensions could go here */
+  return out
 }
 
-function translateText({ text, lang }) {
-  const postData = {
-    key: API_KEY,
-    text,
-    lang
-  }
-  return yandexRexter.post({
-    path: '/api/v1.5/tr.json/translate',
-    postData,
-    outputFmt: 'json'
-  })
-}
-
-export { getSupportedLangs, translateText }
-
-export default { getSupportedLangs, translateText }
+export { LangUtils }

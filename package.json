@@ -1,8 +1,8 @@
 {
   "name": "les-utils",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Utilities used by lesky",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec babel-node index.js",
     "build": "babel src -d dist",

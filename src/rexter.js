@@ -5,10 +5,10 @@ import https, { Agent as HttpsAgent } from 'https'
 import bl from 'bl'
 import { parse as parseCookie } from 'cookie'
 import { stringify } from 'querystring'
-import { URL as ParseUrl } from 'url'
+import { parse as urlParse } from 'url'
 import { createGunzip } from 'zlib'
-import { parseXML } from './string'
-import { promiseEach, promiseSeries } from './promises'
+import { parseXML } from '@/src/string'
+import { PromiseUtils } from '@/src/promises'
 import Debug from 'debug'
 
 const debug = Debug('utils:rexter')
@@ -41,7 +41,13 @@ const outputFmts = {
 
 /* Exports */
 export default function Rexter(cfg) {
-  const { family = 4, proto = 'https', hostname = '', port = 443 } = cfg
+  const _cfg = Object.assign({}, cfg)
+  if (_cfg.url) {
+    const { hostname, port, proto, path: basePath } = urlParse(_cfg.url)
+    Object.assign(_cfg, { hostname, port, proto, basePath })
+  }
+
+  const { family = 4, proto = 'https', hostname = '', port = 443, auth } = _cfg
 
   const agent = proto === 'https' ? httpsAgent : httpAgent
   let _cookies
@@ -87,84 +93,6 @@ export default function Rexter(cfg) {
     _cookies = cookies
   }
 
-  function formatResp(response, outputFmt) {
-    if (outputFmts[outputFmt]) {
-      return outputFmts[outputFmt](response)
-    } else {
-      return response
-    }
-  }
-
-  function batchRequests(info = {}) {
-    const {
-      iteratee = 'items',
-      method,
-      headers,
-      pathTemplate,
-      postDataTemplate,
-      transform,
-      sequential,
-      outputFmt
-    } = info
-    let { replaceToken = '[ITEM]' } = info
-
-    const collection = info[iteratee]
-    const reqOptions = {
-      method,
-      path: info.path,
-      outputFmt,
-      headers,
-      transform
-    }
-    let stringifier = stringify
-
-    if (postDataTemplate) {
-      stringifier = stringifiers[reqOptions.headers['Content-Type']]
-      reqOptions.postStrTemplate = stringifier(postDataTemplate)
-      reqOptions.method = 'POST'
-    }
-
-    const batchMethod = sequential ? promiseSeries : promiseEach
-    return batchMethod({
-      items: collection,
-      handleItem(item) {
-        reqOptions.path = pathTemplate.replace(replaceToken, item)
-        // .replace(replaceToken.toLowerCase(), item.toLowerCase())
-
-        if (reqOptions.postStrTemplate) {
-          if (
-            reqOptions.headers['Content-Type'] ===
-            'application/x-www-form-urlencoded'
-          ) {
-            replaceToken = encodeURIComponent(replaceToken)
-          }
-          reqOptions.postStr = reqOptions.postStrTemplate
-            .replace(replaceToken, item)
-            .replace(replaceToken.toLowerCase(), item.toLowerCase())
-        }
-
-        return request(reqOptions).catch((err) => {
-          return { item }
-        })
-      },
-      transform: (resp) => collection.map((item) => resp[item])
-    })
-  }
-
-  function get({ url, options }) {
-    const { pathname: path, hostname } = new ParseUrl(url)
-    const reqOptions = Object.assign({ path, hostname }, options)
-    return request(reqOptions)
-  }
-
-  function post({ path, postData, ...options }) {
-    const reqOptions = Object.assign(
-      { path, postData, method: 'POST' },
-      options
-    )
-    return request(reqOptions)
-  }
-
   function downloadFile({ url, dest, notify }) {
     return new Promise((resolve) => {
       const outStream = fs.createWriteStream(dest)
@@ -192,22 +120,58 @@ export default function Rexter(cfg) {
     })
   }
 
+  function formatResp(response, outputFmt) {
+    if (outputFmts[outputFmt]) {
+      return outputFmts[outputFmt](response)
+    } else {
+      return response
+    }
+  }
+
+  function get({ path, url, options }) {
+    const reqOptions = Object.assign({ path }, options)
+    if (url) {
+      const { pathname: path, hostname, search } = urlParse(url)
+      Object.assign(reqOptions, {
+        path: path + search,
+        hostname,
+        search,
+        prependPath: false
+      })
+    }
+
+    return request(reqOptions)
+  }
+
+  function post({ path, postData, ...options }) {
+    const reqOptions = Object.assign(
+      { path, postData, method: 'POST' },
+      options
+    )
+
+    return request(reqOptions)
+  }
+
   function request(reqOptions) {
     const {
       postData,
+      prependPath = true,
       method = 'GET',
       notify,
       outputFmt,
       transform
     } = reqOptions
     let { postStr } = reqOptions
+    const { basePath } = _cfg
     reqOptions.headers = Object.assign({}, _defaultHeaders, reqOptions.headers)
     const optsCopy = {
+      auth,
       agent,
       family,
       hostname,
       port
     }
+
     const protoObj = proto === 'https' ? https : http
     Object.assign(optsCopy, reqOptions)
     Object.assign(optsCopy.headers, reqOptions.headers)
@@ -226,6 +190,10 @@ export default function Rexter(cfg) {
       } else if (postStr) {
         optsCopy.headers['Content-Length'] = postStr.length
       }
+    }
+
+    if (basePath && prependPath) {
+      optsCopy.path = `${basePath}${optsCopy.path}`
     }
 
     return new Promise((resolve, reject) => {
@@ -288,14 +256,77 @@ export default function Rexter(cfg) {
     })
   }
 
+  function requestMany(info = {}) {
+    const {
+      iteratee = 'items',
+      method,
+      headers = {},
+      notify,
+      pathTemplate,
+      postDataTemplate,
+      transform,
+      sequential,
+      outputFmt
+    } = info
+    const { replaceToken = '[ITEM]' } = info
+
+    const collection = info[iteratee]
+    const reqOptions = {
+      method,
+      path: info.path,
+      outputFmt,
+      headers,
+      transform
+    }
+    let stringifier = stringify
+
+    if (postDataTemplate) {
+      if (!reqOptions.headers['Content-Type']) {
+        reqOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+      }
+      stringifier = stringifiers[reqOptions.headers['Content-Type']]
+      reqOptions.postStrTemplate = stringifier(postDataTemplate)
+      reqOptions.method = 'POST'
+    }
+
+    const batchMethod = sequential ? PromiseUtils.series : PromiseUtils.each
+    return batchMethod({
+      items: collection,
+      handleItem(item) {
+        let replaceTokenCopy = replaceToken
+        if (pathTemplate) {
+          reqOptions.path = pathTemplate.replace(replaceToken, item)
+        }
+
+        if (reqOptions.postStrTemplate) {
+          if (
+            reqOptions.headers['Content-Type'] ===
+            'application/x-www-form-urlencoded'
+          ) {
+            replaceTokenCopy = encodeURIComponent(replaceToken)
+          }
+          reqOptions.postStr = reqOptions.postStrTemplate
+            .replace(replaceTokenCopy, item)
+            .replace(replaceTokenCopy.toLowerCase(), item.toLowerCase())
+        }
+
+        return request(reqOptions).catch((err) => {
+          console.error('Error requesting item', item, err)
+          return { item }
+        })
+      },
+      notify
+    })
+  }
+
   return Object.freeze({
-    batchRequests,
     cookiesValid,
     getCookies,
     setCookies,
+    downloadFile,
     get,
     post,
-    downloadFile,
-    request
+    request,
+    requestMany
   })
 }

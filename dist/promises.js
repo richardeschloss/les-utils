@@ -3,89 +3,112 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.promiseEach = promiseEach;
-exports.promiseSeries = promiseSeries;
-exports.default = void 0;
-
-function promiseEach(opts) {
-  const {
-    items = [],
-    groupBy,
-    handleItem,
-    transform,
-    notify
-  } = opts;
-  const nItems = items.length;
-  let doneCnt = 0;
-  let out = {};
-  return new Promise((resolve, reject) => {
-    items.forEach(async (item, itemIdx) => {
-      const resp = await handleItem(item, itemIdx).catch(reject);
-
-      if (groupBy) {
-        out[item[groupBy]] = resp;
-      } else if (typeof item === 'string') {
-        out[item] = resp;
-      }
-
-      doneCnt++;
-
-      if (notify) {
-        notify({
-          evt: 'promiseEachProgress',
-          data: {
-            progress: doneCnt / nItems,
-            resp,
-            item
+exports.PromiseUtils = void 0;
+const PromiseUtils = Object.freeze({
+  each(opts) {
+    const {
+      items = [],
+      groupBy,
+      handleItem,
+      transform,
+      notify
+    } = opts;
+    const nItems = items.length;
+    let doneCnt = 0;
+    let out = {};
+    return new Promise(resolve => {
+      items.forEach(async (item, itemIdx) => {
+        const resp = await handleItem(item, itemIdx).catch(err => {
+          if (notify) {
+            notify({
+              evt: 'promiseEachErr',
+              data: {
+                err,
+                item
+              }
+            });
           }
         });
-      }
 
-      if (doneCnt === nItems) {
-        if (transform) out = transform(out);
-        resolve(out);
-      }
-    });
-  });
-}
+        if (resp) {
+          if (groupBy) {
+            out[item[groupBy]] = resp;
+          } else if (typeof item === 'string') {
+            out[item] = resp;
+          }
+        }
 
-function promiseSeries(opts) {
-  const {
-    items = [],
-    handleItem,
-    transform,
-    notify
-  } = opts;
-  let doneCnt = 0;
-  const nItems = items.length;
-  let out = {};
-  return new Promise(resolve => {
-    ;
+        doneCnt++;
 
-    (async function handleNext() {
-      const itemIdx = doneCnt;
-      const item = items[itemIdx];
-      const resp = await handleItem(item, itemIdx);
-      out[item] = resp;
-      doneCnt++;
-      if (notify) notify({
-        progress: doneCnt / nItems,
-        resp,
-        item
+        if (notify) {
+          notify({
+            evt: 'promiseEachProgress',
+            data: {
+              resp,
+              item
+            },
+            progress: doneCnt / nItems
+          });
+        }
+
+        if (doneCnt === nItems) {
+          if (transform) out = transform(out);
+          resolve(out);
+        }
       });
+    });
+  },
 
-      if (doneCnt === nItems) {
-        if (transform) out = transform(out);
-        resolve(out);
-      } else {
-        handleNext();
-      }
-    })();
-  });
-}
+  series(opts) {
+    const {
+      items = [],
+      handleItem,
+      transform,
+      notify
+    } = opts;
+    let doneCnt = 0;
+    const nItems = items.length;
+    let out = {};
+    return new Promise(resolve => {
+      ;
 
-var _default = {
-  promiseEach,
-  promiseSeries
-};
-exports.default = _default;
+      (async function handleNext() {
+        const itemIdx = doneCnt;
+        const item = items[itemIdx];
+        const resp = await handleItem(item, itemIdx).catch(err => {
+          if (notify) {
+            notify({
+              evt: 'promiseSeriesErr',
+              data: {
+                err,
+                item
+              }
+            });
+          }
+        });
+        out[item] = resp;
+        doneCnt++;
+
+        if (notify) {
+          notify({
+            evt: 'promiseEachProgress',
+            data: {
+              resp,
+              item
+            },
+            progress: doneCnt / nItems
+          });
+        }
+
+        if (doneCnt === nItems) {
+          if (transform) out = transform(out);
+          resolve(out);
+        } else {
+          handleNext();
+        }
+      })();
+    });
+  }
+
+});
+exports.PromiseUtils = PromiseUtils;
