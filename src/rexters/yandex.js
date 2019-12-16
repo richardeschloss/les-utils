@@ -1,18 +1,10 @@
-import Rexter from '@/src/rexter'
+import Rexter, { checkEnv } from '@/src/rexter'
 
 const { K8S_SECRET_YANDEX_TRANSLATE: YANDEX_API_KEY_BASE64 } = process.env
 const reqdVars = ['K8S_SECRET_YANDEX_TRANSLATE']
 
-function checkEnv() {
-  reqdVars.forEach((v) => {
-    if (!process.env[v]) {
-      throw new Error(`${v} undefined. Please define and encode as base64`)
-    }
-  })
-}
-
 function Svc() {
-  checkEnv()
+  checkEnv({ reqdVars })
   const YANDEX_API_KEY = Buffer.from(YANDEX_API_KEY_BASE64, 'base64').toString()
   const yandexRexter = Rexter({
     hostname: 'translate.yandex.net'

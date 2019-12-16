@@ -1,4 +1,4 @@
-import Rexter from '@/src/rexter'
+import Rexter, { checkEnv } from '@/src/rexter'
 
 const {
   K8S_SECRET_WATSON_TRANSLATE: WATSON_API_KEY_BASE64,
@@ -7,16 +7,8 @@ const {
 
 const reqdVars = ['K8S_SECRET_WATSON_TRANSLATE', 'K8S_SECRET_WATSON_ENDPOINT1']
 
-function checkEnv() {
-  reqdVars.forEach((v) => {
-    if (!process.env[v]) {
-      throw new Error(`${v} undefined. Please define and encode as base64`)
-    }
-  })
-}
-
 function Svc() {
-  checkEnv()
+  checkEnv({ reqdVars })
   const WATSON_API_KEY = Buffer.from(WATSON_API_KEY_BASE64, 'base64').toString()
   const WATSON_ENDPOINT = Buffer.from(
     WATSON_ENDPOINT1_BASE64,

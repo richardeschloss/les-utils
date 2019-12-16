@@ -40,6 +40,14 @@ const outputFmts = {
 }
 
 /* Exports */
+export function checkEnv({ reqdVars = [] }) {
+  reqdVars.forEach((v) => {
+    if (!process.env[v]) {
+      throw new Error(`${v} undefined. Please define and encode as base64`)
+    }
+  })
+}
+
 export default function Rexter(cfg) {
   const _cfg = Object.assign({}, cfg)
   if (_cfg.url) {
