@@ -3,10 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getSupportedLangs = getSupportedLangs;
-exports.translateMany = translateMany;
-exports.translateText = translateText;
-exports.identifiableLanguages = void 0;
+exports.LangUtils = LangUtils;
 
 var _url = require("url");
 
@@ -14,8 +11,48 @@ var _rexter = _interopRequireDefault(require("./rexter"));
 
 var _promises = require("./promises");
 
+var _ibm = require("./rexters/ibm");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const rexters = {
+  ibm: _ibm.Svc
+};
+
+function LangUtils({
+  api = 'ibm'
+}) {
+  if (!rexters[api]) {
+    throw new Error(`svc ${api} not implemented`);
+  }
+
+  const out = rexters[api];
+  /* Custom extensions could go here */
+
+  return out;
+}
+
+const LangUtilsX = {
+  run({
+    svc = 'ibm',
+    method = '',
+    ...args
+  }) {
+    if (!rexters[svc]) {
+      console.log(`svc ${svc} not supported. Please try ${Object.keys(rexters)}`);
+      return;
+    }
+
+    if (!rexters[svc][method]) {
+      console.log(`svc ${svc} does not support or implemement method ${method}.\
+        Please try another svc or supported methods ${rexters[svc].supportedMethods}`);
+      return;
+    }
+
+    return rexters[svc][method](args);
+  }
+
+};
 const {
   K8S_SECRET_YANDEX_TRANSLATE: YANDEX_API_KEY_BASE64,
   K8S_SECRET_WATSON_TRANSLATE: WATSON_API_KEY_BASE64,
@@ -35,44 +72,66 @@ if (WATSON_API_KEY_BASE64 && WATSON_ENDPOINT1_BASE64) {
 const yandexRexter = (0, _rexter.default)({
   hostname: 'translate.yandex.net'
 });
-const ibmUrlParsed = (0, _url.parse)(WATSON_ENDPOINT);
-const ibmRexter = (0, _rexter.default)({
-  hostname: ibmUrlParsed.hostname
-});
-const identifiableLanguages = {
-  ibm({}) {
-    return ibmRexter.get({
-      url: `${WATSON_ENDPOINT}/v3/identifiable_languages?version=2018-05-01`,
-      options: {
-        auth: `apikey:${WATSON_API_KEY}`,
-        outputFmt: 'json'
-      }
-    });
+let ibmUrlParsed = {};
+let ibmRexter = {};
+
+if (WATSON_ENDPOINT) {
+  ibmUrlParsed = (0, _url.parse)(WATSON_ENDPOINT);
+  ibmRexter = (0, _rexter.default)({
+    hostname: ibmUrlParsed.hostname
+  });
+}
+
+const checkEnv = {
+  // ibm() {
+  //   if (!WATSON_ENDPOINT) {
+  //     throw new Error(
+  //       'WATSON_ENDPOINT undefined. Please encode as base64 and set K8S_SECRET_WATSON_ENDPOINT1 \
+  //       to that encoded value'
+  //     )
+  //   }
+  //   if (!WATSON_API_KEY) {
+  //     throw new Error(
+  //       'WATSON_API_KEY undefined. Please encode as base64 and set K8S_SECRET_WATSON_TRANSLATE \
+  //       to that encoded value'
+  //     )
+  //   }
+  // },
+  yandex() {
+    if (!YANDEX_API_KEY) {
+      throw new Error('YANDEX_API_KEY undefined. Please encode as base64 and set K8S_SECRET_YANDEX_TRANSLATE \
+        to that encoded value');
+    }
   }
 
-};
-exports.identifiableLanguages = identifiableLanguages;
-const supportLangs = {
-  ibm({
-    src = 'en'
-  }) {
-    console.log('getting supported langs from IBM');
-    return ibmRexter.get({
-      url: `${WATSON_ENDPOINT}/v3/models?version=2018-05-01`,
-      options: {
-        auth: `apikey:${WATSON_API_KEY}`,
-        outputFmt: 'json',
-        transform: ({
-          models
-        }) => models.filter(({
-          source
-        }) => source === src).map(({
-          target
-        }) => target)
-      }
-    });
-  },
+}; // const identifiableLanguages = {
+//   ibm() {
+//     checkEnv.ibm()
+//     return ibmRexter.get({
+//       url: `${WATSON_ENDPOINT}/v3/identifiable_languages?version=2018-05-01`,
+//       options: {
+//         auth: `apikey:${WATSON_API_KEY}`,
+//         outputFmt: 'json'
+//       }
+//     })
+//   }
+// }
 
+const supportLangs = {
+  // ibm({ src = 'en' }) {
+  //   console.log('getting supported langs from IBM')
+  //   return ibmRexter.get({
+  //     url: `${WATSON_ENDPOINT}/v3/models?version=2018-05-01`,
+  //     options: {
+  //       auth: `apikey:${WATSON_API_KEY}`,
+  //       outputFmt: 'json',
+  //       transform: ({ models }) =>
+  //         models
+  //           .filter(({ source }) => source === src)
+  //           .map(({ target }) => target)
+  //     }
+  //   })
+  // },
   yandex({
     ui = 'en'
   }) {
@@ -90,32 +149,26 @@ const supportLangs = {
 
 };
 const translate = {
-  ibm({
-    text,
-    lang,
-    src = 'en'
-  }) {
-    const postData = {
-      text,
-      // Can be [String] or String
-      model_id: `${src}-${lang}`
-    };
-    return ibmRexter.post({
-      path: `${ibmUrlParsed.path}/v3/translate?version=2018-05-01`,
-      postData,
-      auth: `apikey:${WATSON_API_KEY}`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      outputFmt: 'json',
-      transform: ({
-        translations
-      }) => translations
-    }).catch(() => {
-      throw new Error(`Error translating to lang ${lang}.`);
-    });
-  },
-
+  // ibm({ text, lang, src = 'en' }) {
+  //   const postData = {
+  //     text, // Can be [String] or String
+  //     model_id: `${src}-${lang}`
+  //   }
+  //   return ibmRexter
+  //     .post({
+  //       path: `${ibmUrlParsed.path}/v3/translate?version=2018-05-01`,
+  //       postData,
+  //       auth: `apikey:${WATSON_API_KEY}`,
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       outputFmt: 'json',
+  //       transform: ({ translations }) => translations
+  //     })
+  //     .catch(() => {
+  //       throw new Error(`Error translating to lang ${lang}.`)
+  //     })
+  // },
   yandex({
     text,
     lang
@@ -187,14 +240,15 @@ const translateBatch = {
 
 function getSupportedLangs({
   svc = 'ibm'
-}) {
-  return supportLangs[svc]({});
+}) {// checkEnv[svc]()
+  // return supportLangs[svc]({})
 }
 
 function translateMany({
   svc = 'ibm',
   ...args
 }) {
+  checkEnv[svc]();
   return translateBatch[svc](args);
 }
 
@@ -202,5 +256,6 @@ function translateText({
   svc = 'ibm',
   ...args
 }) {
+  checkEnv[svc]();
   return translate[svc](args);
 }

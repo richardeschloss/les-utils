@@ -1,4 +1,4 @@
-const LangUtils = require('./dist/language')
+const { LangUtils } = require('./dist/language')
 const PromiseUtils = require('./dist/promises')
 
 module.exports = {
