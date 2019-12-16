@@ -7,7 +7,7 @@ import { parse as parseCookie } from 'cookie'
 import { stringify } from 'querystring'
 import { parse as urlParse } from 'url'
 import { createGunzip } from 'zlib'
-import { parseXML } from './string'
+import { parseXML } from '@/src/string'
 import { PromiseUtils } from '@/src/promises'
 import Debug from 'debug'
 
@@ -260,7 +260,7 @@ export default function Rexter(cfg) {
     const {
       iteratee = 'items',
       method,
-      headers,
+      headers = {},
       notify,
       pathTemplate,
       postDataTemplate,
@@ -268,7 +268,7 @@ export default function Rexter(cfg) {
       sequential,
       outputFmt
     } = info
-    let { replaceToken = '[ITEM]' } = info
+    const { replaceToken = '[ITEM]' } = info
 
     const collection = info[iteratee]
     const reqOptions = {
@@ -281,6 +281,9 @@ export default function Rexter(cfg) {
     let stringifier = stringify
 
     if (postDataTemplate) {
+      if (!reqOptions.headers['Content-Type']) {
+        reqOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+      }
       stringifier = stringifiers[reqOptions.headers['Content-Type']]
       reqOptions.postStrTemplate = stringifier(postDataTemplate)
       reqOptions.method = 'POST'
@@ -290,6 +293,7 @@ export default function Rexter(cfg) {
     return batchMethod({
       items: collection,
       handleItem(item) {
+        let replaceTokenCopy = replaceToken
         if (pathTemplate) {
           reqOptions.path = pathTemplate.replace(replaceToken, item)
         }
@@ -299,11 +303,11 @@ export default function Rexter(cfg) {
             reqOptions.headers['Content-Type'] ===
             'application/x-www-form-urlencoded'
           ) {
-            replaceToken = encodeURIComponent(replaceToken)
+            replaceTokenCopy = encodeURIComponent(replaceToken)
           }
           reqOptions.postStr = reqOptions.postStrTemplate
-            .replace(replaceToken, item)
-            .replace(replaceToken.toLowerCase(), item.toLowerCase())
+            .replace(replaceTokenCopy, item)
+            .replace(replaceTokenCopy.toLowerCase(), item.toLowerCase())
         }
 
         return request(reqOptions).catch((err) => {
