@@ -1,5 +1,5 @@
 import test from 'ava'
-import { PromiseUtils } from '@/src/promises'
+import { PromiseUtils } from '@/src/promise'
 
 test('.each (items undefined)', async (t) => {
   const resp = await PromiseUtils.each({})

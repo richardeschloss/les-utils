@@ -24,7 +24,7 @@ var _zlib = require("zlib");
 
 var _string = require("./string");
 
-var _promises = require("./promises");
+var _promise = require("./promise");
 
 var _debug = _interopRequireDefault(require("debug"));
 
@@ -367,7 +367,7 @@ function Rexter(cfg) {
       reqOptions.method = 'POST';
     }
 
-    const batchMethod = sequential ? _promises.PromiseUtils.series : _promises.PromiseUtils.each;
+    const batchMethod = sequential ? _promise.PromiseUtils.series : _promise.PromiseUtils.each;
     return batchMethod({
       items: collection,
 

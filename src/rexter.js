@@ -8,7 +8,7 @@ import { stringify } from 'querystring'
 import { parse as urlParse } from 'url'
 import { createGunzip } from 'zlib'
 import { parseXML } from '@/src/string'
-import { PromiseUtils } from '@/src/promises'
+import { PromiseUtils } from '@/src/promise'
 import Debug from 'debug'
 
 const debug = Debug('utils:rexter')
