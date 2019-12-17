@@ -6,6 +6,6 @@ export default {
   files: [
     'test/specs/language.js',
     'test/specs/string.js',
-    'test/specs/promises.js'
+    'test/specs/promise.js'
   ]
 }
