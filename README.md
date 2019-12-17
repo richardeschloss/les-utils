@@ -4,7 +4,7 @@
 [![](https://gitlab.com/richardeschloss/les-utils/badges/master/coverage.svg)](https://gitlab.com/richardeschloss/les-utils)
 [![NPM](https://img.shields.io/npm/l/les-utils)](https://github.com/richardeschloss/les-utils/blob/development/LICENSE)
 
-# Les Utils - Les Utils (Less but still powerful)
+# Les Utils (Less but still powerful)
 
 This project was originally created to help support [lesky](https://github.com/richardeschloss/les). Originally, these utils were confined to that project, but since these utils can be nifty and reusable, I thought it would be wise to separate them out into their own project. That's exactly what this is. `les-utils` is less but versatile. With any luck, `les-utils` will become even less as the ES language features improve. 
 
