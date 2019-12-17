@@ -82,4 +82,4 @@ const resp = await PromiseUtils.each({
 ```
 
 
-Why not just use `Promise.all`? In many cases, yes, I'm happy to use `Promise.all`. However, if there are MANY promises to be fulfilled, I like to have the option to be notified when each promise as been fulfilled. I found this to a be a relatively simple way to do what I want.
+Why not just use `Promise.all`? In many cases, yes, I'm happy to use `Promise.all`. However, if there are MANY promises to be fulfilled, I like to have the option to be notified when each promise has been fulfilled. I found this to a be a relatively simple way to do what I want.
