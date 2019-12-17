@@ -21,7 +21,7 @@ function LangUtils({
     throw new Error(`svc ${api} not implemented`);
   }
 
-  const out = rexters[api];
+  const out = rexters[api]();
   /* Custom extensions could go here */
 
   return out;

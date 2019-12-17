@@ -27,3 +27,11 @@ export function parseXML(xml) {
     })
   })
 }
+
+const StringUtils = {
+  camelCase,
+  startCase,
+  parseXML
+}
+
+export { StringUtils }

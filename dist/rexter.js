@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.checkEnv = checkEnv;
 exports.default = Rexter;
 
 var _fs = _interopRequireDefault(require("fs"));
@@ -23,7 +24,7 @@ var _zlib = require("zlib");
 
 var _string = require("./string");
 
-var _promises = require("./promises");
+var _promise = require("./promise");
 
 var _debug = _interopRequireDefault(require("debug"));
 
@@ -59,6 +60,16 @@ const outputFmts = {
   xml: _string.parseXML
 };
 /* Exports */
+
+function checkEnv({
+  reqdVars = []
+}) {
+  reqdVars.forEach(v => {
+    if (!process.env[v]) {
+      throw new Error(`${v} undefined. Please define and encode as base64`);
+    }
+  });
+}
 
 function Rexter(cfg) {
   const _cfg = Object.assign({}, cfg);
@@ -356,7 +367,7 @@ function Rexter(cfg) {
       reqOptions.method = 'POST';
     }
 
-    const batchMethod = sequential ? _promises.PromiseUtils.series : _promises.PromiseUtils.each;
+    const batchMethod = sequential ? _promise.PromiseUtils.series : _promise.PromiseUtils.each;
     return batchMethod({
       items: collection,
 

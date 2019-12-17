@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.camelCase = camelCase;
 exports.startCase = startCase;
 exports.parseXML = parseXML;
+exports.StringUtils = void 0;
 
 var _xml2js = require("xml2js");
 
@@ -32,3 +33,10 @@ function parseXML(xml) {
     });
   });
 }
+
+const StringUtils = {
+  camelCase,
+  startCase,
+  parseXML
+};
+exports.StringUtils = StringUtils;

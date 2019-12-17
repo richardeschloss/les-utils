@@ -8,7 +8,7 @@ import { stringify } from 'querystring'
 import { parse as urlParse } from 'url'
 import { createGunzip } from 'zlib'
 import { parseXML } from '@/src/string'
-import { PromiseUtils } from '@/src/promises'
+import { PromiseUtils } from '@/src/promise'
 import Debug from 'debug'
 
 const debug = Debug('utils:rexter')
@@ -40,6 +40,14 @@ const outputFmts = {
 }
 
 /* Exports */
+export function checkEnv({ reqdVars = [] }) {
+  reqdVars.forEach((v) => {
+    if (!process.env[v]) {
+      throw new Error(`${v} undefined. Please define and encode as base64`)
+    }
+  })
+}
+
 export default function Rexter(cfg) {
   const _cfg = Object.assign({}, cfg)
   if (_cfg.url) {

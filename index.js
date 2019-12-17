@@ -1,7 +1,9 @@
 const { LangUtils } = require('./dist/language')
-const PromiseUtils = require('./dist/promises')
+const { PromiseUtils } = require('./dist/promise')
+const { StringUtils } = require('./dist/string')
 
 module.exports = {
   LangUtils,
-  PromiseUtils
+  PromiseUtils,
+  StringUtils
 }

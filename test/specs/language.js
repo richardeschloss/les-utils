@@ -3,6 +3,20 @@ import { LangUtils } from '@/src/language'
 
 const apis = ['ibm', 'yandex']
 
+test('Unsupported api', (t) => {
+  const api = 'none'
+  try {
+    LangUtils({ api })
+  } catch (err) {
+    t.is(err.message, `svc ${api} not implemented`)
+  }
+})
+
+test('Default api', (t) => {
+  const svc = LangUtils({})
+  t.truthy(svc)
+})
+
 apis.forEach((api) => {
   const svc = LangUtils({ api })
 
@@ -43,6 +57,19 @@ apis.forEach((api) => {
   test(`Translate Many (${api})`, async (t) => {
     const resp = await svc.translateMany({
       sequential: true,
+      texts: ['hello', 'world'],
+      langs: ['fr', 'es'], // 'all'
+      notify({ lang, result }) {
+        console.log(lang, result)
+      }
+    })
+    console.log('resp', resp)
+    t.pass()
+  })
+
+  test(`Translate Many (${api}), parallel request`, async (t) => {
+    const resp = await svc.translateMany({
+      sequential: false,
       texts: ['hello', 'world'],
       langs: ['fr', 'es'], // 'all'
       notify({ lang, result }) {
