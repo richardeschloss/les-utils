@@ -5,25 +5,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Svc = Svc;
 
-var _rexter = _interopRequireDefault(require("../rexter"));
+var _rexter = _interopRequireWildcard(require("../rexter"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 const {
   K8S_SECRET_YANDEX_TRANSLATE: YANDEX_API_KEY_BASE64
 } = process.env;
 const reqdVars = ['K8S_SECRET_YANDEX_TRANSLATE'];
 
-function checkEnv() {
-  reqdVars.forEach(v => {
-    if (!process.env[v]) {
-      throw new Error(`${v} undefined. Please define and encode as base64`);
-    }
-  });
-}
-
 function Svc() {
-  checkEnv();
+  (0, _rexter.checkEnv)({
+    reqdVars
+  });
   const YANDEX_API_KEY = Buffer.from(YANDEX_API_KEY_BASE64, 'base64').toString();
   const yandexRexter = (0, _rexter.default)({
     hostname: 'translate.yandex.net'

@@ -5,6 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PromiseUtils = void 0;
 const PromiseUtils = Object.freeze({
+  delay(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
+  },
+
   each(opts) {
     const {
       items = [],
@@ -17,6 +23,7 @@ const PromiseUtils = Object.freeze({
     let doneCnt = 0;
     let out = {};
     return new Promise(resolve => {
+      if (doneCnt === nItems) resolve(out);
       items.forEach(async (item, itemIdx) => {
         const resp = await handleItem(item, itemIdx).catch(err => {
           if (notify) {
@@ -30,12 +37,12 @@ const PromiseUtils = Object.freeze({
           }
         });
 
-        if (resp) {
-          if (groupBy) {
-            out[item[groupBy]] = resp;
-          } else if (typeof item === 'string') {
-            out[item] = resp;
-          }
+        if (groupBy) {
+          out[item[groupBy]] = resp;
+        } else if (typeof item === 'string') {
+          out[item] = resp;
+        } else {
+          out[itemIdx] = resp;
         }
 
         doneCnt++;
@@ -62,6 +69,7 @@ const PromiseUtils = Object.freeze({
   series(opts) {
     const {
       items = [],
+      groupBy,
       handleItem,
       transform,
       notify
@@ -70,9 +78,16 @@ const PromiseUtils = Object.freeze({
     const nItems = items.length;
     let out = {};
     return new Promise(resolve => {
-      ;
+      function checkDone() {
+        if (doneCnt === nItems) {
+          if (transform) out = transform(out);
+          resolve(out);
+        } else {
+          handleNext();
+        }
+      }
 
-      (async function handleNext() {
+      async function handleNext() {
         const itemIdx = doneCnt;
         const item = items[itemIdx];
         const resp = await handleItem(item, itemIdx).catch(err => {
@@ -86,7 +101,15 @@ const PromiseUtils = Object.freeze({
             });
           }
         });
-        out[item] = resp;
+
+        if (groupBy) {
+          out[item[groupBy]] = resp;
+        } else if (typeof item === 'string') {
+          out[item] = resp;
+        } else {
+          out[itemIdx] = resp;
+        }
+
         doneCnt++;
 
         if (notify) {
@@ -100,13 +123,10 @@ const PromiseUtils = Object.freeze({
           });
         }
 
-        if (doneCnt === nItems) {
-          if (transform) out = transform(out);
-          resolve(out);
-        } else {
-          handleNext();
-        }
-      })();
+        checkDone();
+      }
+
+      checkDone();
     });
   }
 

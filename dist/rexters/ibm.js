@@ -5,9 +5,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Svc = Svc;
 
-var _rexter = _interopRequireDefault(require("../rexter"));
+var _rexter = _interopRequireWildcard(require("../rexter"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 const {
   K8S_SECRET_WATSON_TRANSLATE: WATSON_API_KEY_BASE64,
@@ -15,16 +17,10 @@ const {
 } = process.env;
 const reqdVars = ['K8S_SECRET_WATSON_TRANSLATE', 'K8S_SECRET_WATSON_ENDPOINT1'];
 
-function checkEnv() {
-  reqdVars.forEach(v => {
-    if (!process.env[v]) {
-      throw new Error(`${v} undefined. Please define and encode as base64`);
-    }
-  });
-}
-
 function Svc() {
-  checkEnv();
+  (0, _rexter.checkEnv)({
+    reqdVars
+  });
   const WATSON_API_KEY = Buffer.from(WATSON_API_KEY_BASE64, 'base64').toString();
   const WATSON_ENDPOINT = Buffer.from(WATSON_ENDPOINT1_BASE64, 'base64').toString();
   const ibmRexter = (0, _rexter.default)({

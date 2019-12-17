@@ -1,6 +1,28 @@
-# Les Utils - Tiny Useful Utils Used By Lesky
+[![npm](https://img.shields.io/npm/v/les-utils)](https://www.npmjs.com/package/les-utils)
+[![npm](https://img.shields.io/npm/dt/les-utils)](https://www.npmjs.com/package/les-utils)
+[![](https://gitlab.com/richardeschloss/les-utils/badges/master/pipeline.svg)](https://gitlab.com/richardeschloss/les-utils)
+[![](https://gitlab.com/richardeschloss/les-utils/badges/master/coverage.svg)](https://gitlab.com/richardeschloss/les-utils)
+[![NPM](https://img.shields.io/npm/l/les-utils)](https://github.com/richardeschloss/les-utils/blob/development/LICENSE)
 
-Status: not exactly ready for public consumption.
+# Les Utils - Les Utils (Less but still powerful)
+
+This project was originally created to help support [lesky](https://github.com/richardeschloss/les). Originally, these utils were confined to that project, but since these utils can be nifty and reusable, I thought it would be wise to separate them out into their own project. That's exactly what this is. `les-utils` is less but versatile. With any luck, `les-utils` will become even less as the ES language features improve. 
+
+## Installation:
+
+1. First install globally
+> npm i -g les-utils
+
+2. Then to use in a project folder link to it:
+> npm link les-utils
+
+## Usage: 
+``` 
+import { LangUtils, PromiseUtils, Rexter, StringUtils } from 'les-utils'
+// Currently exposed utils
+// Read below for further explanation
+
+```
 
 ## Current utilities:
 
@@ -38,7 +60,26 @@ const resp = await rexter.requestMany({
 - Startcase 
 
 4. Promises:
-- `PromiseUtils.each` (like `async.each` but promise-based)
-- `PromiseUtils.series` (like `async.series` but promise-based)
+- `PromiseUtils.delay` (a promise-based delay method so you can stop calling setTimeout. Easy!)
+- `PromiseUtils.each` (similar to `async.each` but promise-based and more versatile)
+- `PromiseUtils.series` (similar to `async.series` but promise-based and more versatile)
+
+a) Example:
+```
+const items = ['item1', 'item2']
+const resp = await PromiseUtils.each({
+  items,
+  async handleItem() {
+    await PromiseUtils.delay(100)
+    return 'ok'
+  },
+  notify({ evt, data }) {
+    const { item, resp } = data
+    // do something with item's resp if you want
+  }
+})
+// resp = { item1: 'ok', item2: 'ok' }
+```
+
 
 Why not just use `Promise.all`? In many cases, yes, I'm happy to use `Promise.all`. However, if there are MANY promises to be fulfilled, I like to have the option to be notified when each promise as been fulfilled. I found this to a be a relatively simple way to do what I want.

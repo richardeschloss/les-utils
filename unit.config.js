@@ -4,7 +4,8 @@ export default {
   ...baseConfig,
   serial: true,
   files: [
-    // 'test/specs/language.js',
-    'test/specs/string.js'
+    'test/specs/language.js',
+    'test/specs/string.js',
+    'test/specs/promises.js'
   ]
 }

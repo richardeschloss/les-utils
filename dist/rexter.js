@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.checkEnv = checkEnv;
 exports.default = Rexter;
 
 var _fs = _interopRequireDefault(require("fs"));
@@ -59,6 +60,16 @@ const outputFmts = {
   xml: _string.parseXML
 };
 /* Exports */
+
+function checkEnv({
+  reqdVars = []
+}) {
+  reqdVars.forEach(v => {
+    if (!process.env[v]) {
+      throw new Error(`${v} undefined. Please define and encode as base64`);
+    }
+  });
+}
 
 function Rexter(cfg) {
   const _cfg = Object.assign({}, cfg);
