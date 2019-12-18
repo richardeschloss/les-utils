@@ -101,7 +101,30 @@ export default function Rexter(cfg) {
     _cookies = cookies
   }
 
-  function downloadFile({ url, dest, notify }) {
+  function formatResp(response, outputFmt) {
+    if (outputFmts[outputFmt]) {
+      return outputFmts[outputFmt](response)
+    } else {
+      return response
+    }
+  }
+
+  function get({ path, url, options }) {
+    const reqOptions = Object.assign({ path }, options)
+    if (url) {
+      const { pathname: path, hostname, search } = urlParse(url)
+      Object.assign(reqOptions, {
+        path: path + search,
+        hostname,
+        search,
+        prependPath: false
+      })
+    }
+
+    return request(reqOptions)
+  }
+
+  function getFile({ url, dest, notify }) {
     return new Promise((resolve) => {
       const outStream = fs.createWriteStream(dest)
       const protoObj = proto === 'https' ? https : http
@@ -126,29 +149,6 @@ export default function Rexter(cfg) {
           .on('end', resolve)
       })
     })
-  }
-
-  function formatResp(response, outputFmt) {
-    if (outputFmts[outputFmt]) {
-      return outputFmts[outputFmt](response)
-    } else {
-      return response
-    }
-  }
-
-  function get({ path, url, options }) {
-    const reqOptions = Object.assign({ path }, options)
-    if (url) {
-      const { pathname: path, hostname, search } = urlParse(url)
-      Object.assign(reqOptions, {
-        path: path + search,
-        hostname,
-        search,
-        prependPath: false
-      })
-    }
-
-    return request(reqOptions)
   }
 
   function post({ path, postData, ...options }) {
@@ -331,8 +331,8 @@ export default function Rexter(cfg) {
     cookiesValid,
     getCookies,
     setCookies,
-    downloadFile,
     get,
+    getFile,
     post,
     request,
     requestMany
