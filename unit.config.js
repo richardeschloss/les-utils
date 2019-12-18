@@ -7,6 +7,7 @@ export default {
     'test/specs/language.js',
     'test/specs/string.js',
     'test/specs/promise.js',
-    'test/specs/rexter.js'
+    'test/specs/rexter.js',
+    'test/specs/security.js'
   ]
 }
