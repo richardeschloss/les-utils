@@ -9,16 +9,21 @@ test('Find free port (default range)', async (t) => {
 
 test('Find free port (default range, 8000 used)', (t) => {
   const port = 8000
-  return new Promise((resolve) => {
-    createServer({})
+  return new Promise((resolve, reject) => {
+    const server = createServer({})
       .listen(port)
       .on('listening', async () => {
+        console.log('listening at', server.address().port)
         const freePort = await NetUtils.findFreePort({})
         const isPortTaken = await NetUtils.portTaken({ port })
         t.true(isPortTaken)
         t.not(freePort, port)
         t.true(freePort >= 8000 && freePort <= 9000)
         resolve()
+      })
+      .on('error', (err) => {
+        console.error('err occurred', err)
+        reject(err)
       })
   })
 })
