@@ -129,24 +129,22 @@ export default function Rexter(cfg) {
       const outStream = fs.createWriteStream(dest)
       const protoObj = proto === 'https' ? https : http
       protoObj.get(url, (res) => {
-        res.pipe(outStream)
+        res.pipe(outStream).on('close', resolve)
         const size = parseInt(res.headers['content-length'])
         let bytesRxd = 0
         let downloadProgress = 0
-        res
-          .on('data', (d) => {
-            bytesRxd += d.length
-            downloadProgress = (bytesRxd / size) * 100
-            if (notify) {
-              notify({
-                evt: 'setDownloadProgress',
-                data: {
-                  downloadProgress
-                }
-              })
-            }
-          })
-          .on('end', resolve)
+        res.on('data', (d) => {
+          bytesRxd += d.length
+          downloadProgress = (bytesRxd / size) * 100
+          if (notify) {
+            notify({
+              evt: 'setDownloadProgress',
+              data: {
+                downloadProgress
+              }
+            })
+          }
+        })
       })
     })
   }
