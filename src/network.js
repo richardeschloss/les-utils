@@ -18,13 +18,19 @@ const NetUtils = {
   },
 
   netstatP(opts) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const res = []
       netstat(
         {
           ...opts,
           done: (err) => {
-            console.error('done err?', err)
+            if (err) {
+              console.error(
+                'Netstat error occurred. Is it installed? Install with:\n\
+                apt-get update; apt-get install net-tools'
+              )
+              reject(err)
+            }
             return resolve(res)
           }
         },
