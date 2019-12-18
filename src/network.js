@@ -23,7 +23,8 @@ const NetUtils = {
       netstat(
         {
           ...opts,
-          done: () => {
+          done: (err) => {
+            console.error('done err?', err)
             return resolve(res)
           }
         },
