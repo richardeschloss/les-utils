@@ -19,6 +19,8 @@ cache:
 
 test_utils:
   script:
+    - apt-get update
+    - apt-get install -y net-tools
     - npm install
     - npm run test:unit:cov
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
