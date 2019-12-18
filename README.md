@@ -83,3 +83,11 @@ const resp = await PromiseUtils.each({
 
 
 Why not just use `Promise.all`? In many cases, yes, I'm happy to use `Promise.all`. However, if there are MANY promises to be fulfilled, I like to have the option to be notified when each promise has been fulfilled. I found this to a be a relatively simple way to do what I want.
+
+
+5. Security:
+- `generateSelfSignedCert` (does what it says)
+
+6. NetUtils:
+- `findFreePort` (finds a free port for a specified range)
+- `isPortTaken` (does what it says)
