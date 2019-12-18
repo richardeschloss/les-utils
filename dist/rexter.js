@@ -143,37 +143,6 @@ function Rexter(cfg) {
     _cookies = cookies;
   }
 
-  function downloadFile({
-    url,
-    dest,
-    notify
-  }) {
-    return new Promise(resolve => {
-      const outStream = _fs.default.createWriteStream(dest);
-
-      const protoObj = proto === 'https' ? _https.default : _http.default;
-      protoObj.get(url, res => {
-        res.pipe(outStream);
-        const size = parseInt(res.headers['content-length']);
-        let bytesRxd = 0;
-        let downloadProgress = 0;
-        res.on('data', d => {
-          bytesRxd += d.length;
-          downloadProgress = bytesRxd / size * 100;
-
-          if (notify) {
-            notify({
-              evt: 'setDownloadProgress',
-              data: {
-                downloadProgress
-              }
-            });
-          }
-        }).on('end', resolve);
-      });
-    });
-  }
-
   function formatResp(response, outputFmt) {
     if (outputFmts[outputFmt]) {
       return outputFmts[outputFmt](response);
@@ -206,6 +175,37 @@ function Rexter(cfg) {
     }
 
     return request(reqOptions);
+  }
+
+  function getFile({
+    url,
+    dest,
+    notify
+  }) {
+    return new Promise(resolve => {
+      const outStream = _fs.default.createWriteStream(dest);
+
+      const protoObj = proto === 'https' ? _https.default : _http.default;
+      protoObj.get(url, res => {
+        res.pipe(outStream).on('close', resolve);
+        const size = parseInt(res.headers['content-length']);
+        let bytesRxd = 0;
+        let downloadProgress = 0;
+        res.on('data', d => {
+          bytesRxd += d.length;
+          downloadProgress = bytesRxd / size * 100;
+
+          if (notify) {
+            notify({
+              evt: 'setDownloadProgress',
+              data: {
+                downloadProgress
+              }
+            });
+          }
+        });
+      });
+    });
   }
 
   function post({
@@ -402,8 +402,8 @@ function Rexter(cfg) {
     cookiesValid,
     getCookies,
     setCookies,
-    downloadFile,
     get,
+    getFile,
     post,
     request,
     requestMany
