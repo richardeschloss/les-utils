@@ -13,6 +13,7 @@
     "test:unit": "TEST=specs ava --config unit.config.js --colors",
     "test:unit:watch": "TEST=specs ava --config unit.config.js --colors --watch",
     "test:unit:cov": "TEST=specs nyc ava --config unit.config.js --colors",
+    "deploy:local": "npm run build && cp -r dist/* ~/.npm-global/lib/node_modules/les-utils/dist",
     "deploy:public": "npm run build && npm publish",
     "test:cov:watch": "TEST=specs nyc ava --watch"
   },
