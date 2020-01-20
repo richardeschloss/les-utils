@@ -5,7 +5,8 @@ export default {
   serial: true,
   files: [
     // 'test/specs/array.js'
-    'test/specs/datetime.js'
+    // 'test/specs/datetime.js',
+    'test/specs/format.js'
     // 'test/specs/language.js',
     // 'test/specs/network.js',
     // 'test/specs/object.js'
