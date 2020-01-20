@@ -9,6 +9,7 @@ exports.largeCurrency = largeCurrency;
 exports.largeNumber = largeNumber;
 exports.number = number;
 exports.percentage = percentage;
+exports.toSchema = toSchema;
 exports.FormatUtils = void 0;
 
 var _datetime = require("./datetime");
@@ -228,3 +229,35 @@ const FormatUtils = Object.freeze({
   percentage
 });
 exports.FormatUtils = FormatUtils;
+
+function toSchema({
+  input,
+  fieldMap,
+  schema
+}) {
+  if (!input) return {};
+  return Object.entries(schema).reduce((out, [field, {
+    type,
+    default: dflt,
+    options
+  }]) => {
+    const inputField = fieldMap[field] || field;
+    out[field] = dflt;
+
+    if (typeof inputField === 'function') {
+      const prefmt = inputField(input);
+
+      if (prefmt) {
+        out[field] = prefmt;
+      }
+    } else if (input[inputField]) {
+      out[field] = input[inputField];
+    }
+
+    if (out[field] !== undefined) {
+      out[field] = FormatUtils[type](out[field], options);
+    }
+
+    return out;
+  }, {});
+}

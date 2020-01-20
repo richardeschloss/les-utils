@@ -203,3 +203,28 @@ export const FormatUtils = Object.freeze({
   number,
   percentage
 })
+
+export function toSchema({ input, fieldMap, schema }) {
+  if (!input) return {}
+  return Object.entries(schema).reduce(
+    (out, [field, { type, default: dflt, options }]) => {
+      const inputField = fieldMap[field] || field
+      out[field] = dflt
+      if (typeof inputField === 'function') {
+        const prefmt = inputField(input)
+        if (prefmt) {
+          out[field] = prefmt
+        }
+      } else if (input[inputField]) {
+        out[field] = input[inputField]
+      }
+
+      if (out[field] !== undefined) {
+        out[field] = FormatUtils[type](out[field], options)
+      }
+
+      return out
+    },
+    {}
+  )
+}
