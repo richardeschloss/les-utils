@@ -1,4 +1,5 @@
 const { ArrayUtils } = require('./dist/array')
+const { DateTimeUtils } = require('./dist/datetime')
 const { LangUtils } = require('./dist/language')
 const { NetUtils } = require('./dist/network')
 const { ObjectUtils } = require('./dist/object')
@@ -9,6 +10,7 @@ const { SecurityUtils } = require('./dist/security')
 
 module.exports = {
   ArrayUtils,
+  DateTimeUtils,
   LangUtils,
   NetUtils,
   ObjectUtils,
