@@ -10,8 +10,11 @@ import { createGunzip } from 'zlib'
 import { parseXML } from '@/src/string'
 import { PromiseUtils } from '@/src/promise'
 import Debug from 'debug'
+import { pipeline as pipelineAsync, Writable } from 'stream'
+import { promisify } from 'util'
 
 const debug = Debug('utils:rexter')
+const pipeline = promisify(pipelineAsync)
 
 /* Constants */
 const httpAgent = new Agent({
@@ -109,43 +112,119 @@ export default function Rexter(cfg) {
     }
   }
 
-  function get({ path, url, options }) {
-    const reqOptions = Object.assign({ path }, options)
-    if (url) {
-      const { pathname: path, hostname, search } = urlParse(url)
-      Object.assign(reqOptions, {
-        path: path + search,
-        hostname,
-        search,
-        prependPath: false
+  function get({
+    url = '',
+    options = {},
+    outputFmt,
+    dest,
+    writeOptions = {
+      flags: 'a'
+    },
+    notify = () => {},
+    locals = {},
+    reqTimeout,
+    transform
+  }) {
+    const { protocol } = urlParse(url)
+    const reqOptions = Object.assign(
+      {
+        agent: protocol === 'https:' ? httpsAgent : httpAgent,
+        family
+      },
+      options
+    )
+    let outStream
+    let buf = []
+    let writable
+    if (dest) {
+      outStream = fs.createWriteStream(dest, writeOptions)
+      locals.outStream = outStream
+    } else {
+      writable = new Writable({
+        write(chunk, encoding, callback) {
+          buf.push(chunk)
+          callback()
+        }
       })
+      locals.writable = writable
     }
 
-    return request(reqOptions)
-  }
+    const protoObj = protocol === 'https:' ? https : http
 
-  function getFile({ url, dest, notify }) {
-    return new Promise((resolve) => {
-      const outStream = fs.createWriteStream(dest)
-      const protoObj = proto === 'https' ? https : http
-      protoObj.get(url, (res) => {
-        res.pipe(outStream).on('close', resolve)
-        const size = parseInt(res.headers['content-length'])
-        let bytesRxd = 0
-        let downloadProgress = 0
-        res.on('data', (d) => {
-          bytesRxd += d.length
-          downloadProgress = (bytesRxd / size) * 100
-          if (notify) {
-            notify({
-              evt: 'setDownloadProgress',
-              data: {
-                downloadProgress
-              }
-            })
+    return new Promise((resolve, reject) => {
+      const handleDone = async () => {
+        if (dest) {
+          outStream.close()
+          resolve()
+        } else {
+          let finalResp = Buffer.concat(buf)
+          if (outputFmt) {
+            finalResp = await formatResp(finalResp, outputFmt)
           }
+
+          if (transform) {
+            finalResp = transform(finalResp)
+          }
+          resolve(finalResp)
+        }
+      }
+
+      const handleError = (err) => {
+        debug('get pipeline error', err)
+        reject(err)
+      }
+
+      const req = protoObj
+        .get(url, reqOptions, (res) => {
+          locals.res = res
+          debug('statusCode', res.statusCode)
+          debug('RESP headers', res.headers)
+          const streams = [res]
+          if (res.headers['content-encoding'] === 'gzip') {
+            streams.push(createGunzip())
+          }
+          
+          if (dest) {
+            streams.push(outStream)
+          } else {
+            streams.push(writable)
+          }
+
+          pipeline(...streams)
+            .then(handleDone)
+            .catch(handleError)
+            
+          notify({ evt: 'res' })
+          const size = parseInt(res.headers['content-length'])
+          let bytesRxd = 0
+          let downloadProgress = 0
+          res.on('data', (data) => {
+            if (notify) {
+              bytesRxd += data.length
+              debug(bytesRxd)
+              locals.data = data
+              locals.bytesRxd = bytesRxd
+              notify({ evt: 'data' })
+              if (size) {
+                downloadProgress = (bytesRxd / size) * 100
+                notify({
+                  evt: 'downloadProgress',
+                  data: downloadProgress
+                })
+              }
+            }
+          })
         })
-      })
+        .on('error', (err) => {
+          debug('REQ error', err)
+          reject(err)
+        })
+      locals.req = req
+      if (reqTimeout) {
+        req.setTimeout(reqTimeout, () => {
+          reject(new Error('Request timeout: url=' + url))
+        })
+      }
     })
   }
 
@@ -330,7 +409,6 @@ export default function Rexter(cfg) {
     getCookies,
     setCookies,
     get,
-    getFile,
     post,
     request,
     requestMany
