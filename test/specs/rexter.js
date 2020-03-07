@@ -2,7 +2,7 @@ import test from 'ava'
 import { existsSync, unlinkSync } from 'fs'
 import Rexter from '@/src/rexter'
 
-test('getFile (no listener)', async (t) => {
+test('getFile (no listener)', async (t) => { // Also update les! (if it relied on getFile)
   const rexter = Rexter({})
   const dest = '/tmp/en.json'
   const testOpts = {
