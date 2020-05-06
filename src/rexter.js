@@ -114,7 +114,7 @@ export default function Rexter(cfg) {
 
   function get({
     url = '',
-    options = {},
+    _reqOptions = {},
     outputFmt,
     dest,
     writeOptions = {
@@ -131,10 +131,10 @@ export default function Rexter(cfg) {
         agent: protocol === 'https:' ? httpsAgent : httpAgent,
         family
       },
-      options
+      _reqOptions
     )
     let outStream
-    let buf = []
+    const buf = []
     let writable
     if (dest) {
       outStream = fs.createWriteStream(dest, writeOptions)
@@ -183,7 +183,7 @@ export default function Rexter(cfg) {
           if (res.headers['content-encoding'] === 'gzip') {
             streams.push(createGunzip())
           }
-          
+
           if (dest) {
             streams.push(outStream)
           } else {
@@ -193,7 +193,7 @@ export default function Rexter(cfg) {
           pipeline(...streams)
             .then(handleDone)
             .catch(handleError)
-            
+
           notify({ evt: 'res' })
           const size = parseInt(res.headers['content-length'])
           let bytesRxd = 0
