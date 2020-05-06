@@ -1,6 +1,6 @@
 {
   "name": "les-utils",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Utilities used by lesky",
   "main": "index.js",
   "scripts": {
@@ -54,6 +54,8 @@
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-prettier": "^3.1.1",
+    "kind-of": ">=6.0.3",
+    "minimist": ">=1.2.3",
     "nodemon": "^1.19.4",
     "nyc": "^14.1.1",
     "prettier": "^1.19.1"
