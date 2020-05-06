@@ -158,7 +158,7 @@ function Rexter(cfg) {
 
   function get({
     url = '',
-    options = {},
+    _reqOptions = {},
     outputFmt,
     dest,
     writeOptions = {
@@ -175,9 +175,9 @@ function Rexter(cfg) {
     const reqOptions = Object.assign({
       agent: protocol === 'https:' ? httpsAgent : httpAgent,
       family
-    }, options);
+    }, _reqOptions);
     let outStream;
-    let buf = [];
+    const buf = [];
     let writable;
 
     if (dest) {
