@@ -8,6 +8,7 @@ const { PromiseUtils } = require('./dist/promise')
 const { default: Rexter } = require('./dist/rexter')
 const { StringUtils } = require('./dist/string')
 const { SecurityUtils } = require('./dist/security')
+const { default: Stats } = require('./dist/stats')
 
 module.exports = {
   ArrayUtils,
@@ -20,5 +21,6 @@ module.exports = {
   Rexter,
   StringUtils,
   SecurityUtils,
+  Stats,
   toSchema
 }
