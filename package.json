@@ -49,15 +49,15 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
-    "ava": "^2.4.0",
+    "ava": "^3.8.2",
     "babel-eslint": "^10.0.3",
-    "eslint": "^6.6.0",
+    "eslint": "^7.0.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-prettier": "^3.1.1",
     "kind-of": ">=6.0.3",
-    "minimist": ">=1.2.3",
-    "nodemon": "^1.19.4",
-    "nyc": "^14.1.1",
+    "minimist": "^1.2.5",
+    "nodemon": "^2.0.3",
+    "nyc": "^15.0.1",
     "prettier": "^1.19.1"
   }
 }
