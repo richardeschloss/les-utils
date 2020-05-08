@@ -3,6 +3,9 @@ import querystring from 'querystring'
 import { exec } from 'child_process'
 
 function Svc() {
+  const ig = Rexter({
+    hostname: 'www.instagram.com'
+  })
   const graphIG = Rexter({
     hostname: 'graph.instagram.com'
   })
@@ -79,6 +82,13 @@ function Svc() {
       })
     },
 
+    async getUserMediaWeb({ username }) {
+      return await ig.request({
+        path: `/${username}/?__a=1`,
+        outputFmt: 'json'
+      })
+    },
+
     async getUserMedia({
       user_id,
       access_token = _accessToken,
@@ -97,6 +107,22 @@ function Svc() {
         headers: {
           'Accept-Encoding': 'gzip'
         }
+      })
+    },
+
+    async getAllUserMediaWeb({ username }) {
+      const r = await this.getUserMediaWeb({ username })
+      const { id } = r.graphql.user // Query limits to 50. To get more, may need "after=..."
+      const query = querystring.stringify({
+        query_hash: '9dcf6e1a98bc7f6e92953d5a61027b98',
+        variables: JSON.stringify({
+          id,
+          first: 50
+        })
+      })
+      return await ig.request({
+        path: `/graphql/query/?${query}`,
+        outputFmt: 'json'
       })
     },
 

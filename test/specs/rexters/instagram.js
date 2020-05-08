@@ -43,14 +43,15 @@ test('Exchange Token', async (t) => {
 test('Get Me', async (t) => {
   const r = await svc.getMe({ access_token: authResp.access_token })
   console.log('r', r)
-  // _userId = r.id
   t.pass()
 })
 
 test('Get User', async (t) => {
-  const query = Object.assign({}, authResp)
-  query.fields = 'id,username,media_count'
-  const r = await svc.getUser(query)
+  const r = await svc.getUser({
+    user_id: authResp.user_id,
+    access_token: authResp.access_token,
+    fields: 'id,username,media_count'
+  })
   console.log('user info', r)
   t.pass()
 })
@@ -65,7 +66,27 @@ test('Get User Media', async (t) => {
   t.pass()
 })
 
-test.only('Get All User Media', async (t) => {
+test.only('Get User Media Web', async (t) => {
+  const resp = await svc.getUserMediaWeb({
+    username: process.env.IG_OTHER_USER
+  })
+  const igCache = '/tmp/swimwearlicious_igMedia_12.json'
+  writeFileSync(igCache, JSON.stringify(resp))
+  console.log('user media', resp)
+  t.pass()
+})
+
+test.only('Get All User Media Web', async (t) => {
+  const resp = await svc.getAllUserMediaWeb({
+    username: process.env.IG_OTHER_USER
+  })
+  const igCache = '/tmp/swimwearlicious_igMedia_50.json'
+  writeFileSync(igCache, JSON.stringify(resp))
+  console.log('user media', resp)
+  t.pass()
+})
+
+test('Get All User Media', async (t) => {
   const query = Object.assign({}, authResp)
   query.fields = 'id,caption,timestamp,media_url,thumbnail_url,permalink'
   const resp = await svc.geAllUserMedia(query)
