@@ -2,6 +2,33 @@ import { writeFileSync } from 'fs'
 import test from 'ava'
 import { Svc } from '@/src/rexters/instagram'
 
+/* 
+Notes: process for getting a user's photos and info
+
+1. Add that user to "Instagram Test Users" (their profile must be public)
+
+2. They must accept the invite on the *web* interface: (not avail in mobile)
+ Settings --> Apps and Websites --> Tester invites --> Accept
+
+3. Youre website presents the authorization window...you format the url based on YOUR app's
+"Instagram app ID" and YOUR redirect uri (i.e., need a server, https; http won't work)
+
+4. On their end, they click the link and continue / accept that invite and then they'll be
+redirected to your redirect uri. The redirect uri will contain the auth code. Your server's
+request handler can get that code from "req.query.code"
+
+5. Use that auth code to create/get an *access token* (use svc.createAccessToken).
+NOTE: that auth code can only be used once per successful auth.
+
+6. If you need access longer than 1-2 hours, you need to exchange that token for a longer lived token
+For some reason, "exchange token" gives me a token, but it's still a short-lived token :(
+
+
+7. That token is probably best stored in a database rather than as env vars. Then you can look up the token by user
+Just don't let it leak into client-side code.
+
+*/
+
 const svc = Svc({})
 
 let authResp = {
@@ -11,7 +38,9 @@ let authResp = {
 }
 
 test('Authorize', async (t) => {
-  // Manual process in browser
+  // Manual process in browser (you would have the user click this link to open the auth window...)
+  // Auth window would redirect to your "/login" route on success. you'd have to capture the "code" in the
+  // url params that get sent
   await svc.authorize({
     client_id: process.env.IG_APP_ID,
     redirect_uri: process.env.IG_AUTH_REDIRECT
