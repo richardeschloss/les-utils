@@ -110,20 +110,40 @@ function Svc() {
       })
     },
 
-    async getAllUserMediaWeb({ username }) {
-      const r = await this.getUserMediaWeb({ username })
-      const { id } = r.graphql.user // Query limits to 50. To get more, may need "after=..."
-      const query = querystring.stringify({
-        query_hash: '9dcf6e1a98bc7f6e92953d5a61027b98',
-        variables: JSON.stringify({
-          id,
-          first: 50
+    async getAllUserMediaWeb({ username, limit }) {
+      async function getEdges(id, after) {
+        const query_hash = '9dcf6e1a98bc7f6e92953d5a61027b98'
+        const first = limit || 50
+        const variables = encodeURIComponent(
+          JSON.stringify({
+            id,
+            first,
+            after
+          })
+        )
+
+        const path = `/graphql/query/?query_hash=${query_hash}&variables=${variables}`
+        console.time('requestEdges')
+        const { data } = await ig.request({
+          path,
+          outputFmt: 'json'
         })
-      })
-      return await ig.request({
-        path: `/graphql/query/?${query}`,
-        outputFmt: 'json'
-      })
+        console.timeEnd('requestEdges')
+        const { page_info, edges } = data.user.edge_owner_to_timeline_media
+        allEdges.push(...edges)
+        if (
+          (!limit || (limit && allEdges.length < limit)) &&
+          page_info.has_next_page
+        ) {
+          await getEdges(id, page_info.end_cursor)
+        }
+      }
+
+      const allEdges = []
+      const r = await this.getUserMediaWeb({ username })
+      const { id } = r.graphql.user
+      await getEdges(id)
+      return allEdges
     },
 
     async geAllUserMedia({ user_id, access_token, ...mediaQuery }) {

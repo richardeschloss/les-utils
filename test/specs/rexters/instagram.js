@@ -66,7 +66,7 @@ test('Get User Media', async (t) => {
   t.pass()
 })
 
-test.only('Get User Media Web', async (t) => {
+test('Get User Media Web', async (t) => {
   const resp = await svc.getUserMediaWeb({
     username: process.env.IG_OTHER_USER
   })
@@ -77,12 +77,13 @@ test.only('Get User Media Web', async (t) => {
 })
 
 test.only('Get All User Media Web', async (t) => {
+  const username = process.env.IG_OTHER_USER
   const resp = await svc.getAllUserMediaWeb({
-    username: process.env.IG_OTHER_USER
+    username
   })
-  const igCache = '/tmp/swimwearlicious_igMedia_50.json'
+  const igCache = `/tmp/${process.env.IG_OTHER_USER}_igMedia_all.json`
   writeFileSync(igCache, JSON.stringify(resp))
-  console.log('user media', resp)
+  console.log('user media', resp.length)
   t.pass()
 })
 
