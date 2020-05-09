@@ -21,8 +21,8 @@ request handler can get that code from "req.query.code"
 NOTE: that auth code can only be used once per successful auth.
 
 6. If you need access longer than 1-2 hours, you need to exchange that token for a longer lived token
-For some reason, "exchange token" gives me a token, but it's still a short-lived token :(
-
+--> Ok, works. Before it wasn't. After exchanging for the new token, only use that token...trash the old
+short-lived one. Don't accidentally use the old short one for subsequent requests. (duh)
 
 7. That token is probably best stored in a database rather than as env vars. Then you can look up the token by user
 Just don't let it leak into client-side code.
@@ -33,7 +33,7 @@ const svc = Svc({})
 
 let authResp = {
   access_token: process.env.IG_ACCESS_TOKEN,
-  access_token_long: process.env.IG_ACCESS_TOKEN_LONG, // Not working for some reason
+  access_token_long: process.env.IG_ACCESS_TOKEN_LONG,
   user_id: process.env.IG_USER_ID
 }
 
@@ -70,7 +70,7 @@ test('Exchange Token', async (t) => {
 })
 
 test('Get Me', async (t) => {
-  const r = await svc.getMe({ access_token: authResp.access_token })
+  const r = await svc.getMe({ access_token: authResp.access_token_long })
   console.log('r', r)
   t.pass()
 })
@@ -78,7 +78,7 @@ test('Get Me', async (t) => {
 test('Get User', async (t) => {
   const r = await svc.getUser({
     user_id: authResp.user_id,
-    access_token: authResp.access_token,
+    access_token: authResp.access_token_long,
     fields: 'id,username,media_count'
   })
   console.log('user info', r)
@@ -86,26 +86,43 @@ test('Get User', async (t) => {
 })
 
 test('Get User Media', async (t) => {
-  const query = Object.assign({}, authResp)
-  query.fields = 'id,caption,timestamp,media_url,thumbnail_url,permalink'
-  const resp = await svc.getUserMedia(query)
+  const resp = await svc.getUserMedia({
+    user_id: authResp.user_id,
+    access_token: authResp.access_token_long,
+    fields: 'id,caption,timestamp,media_url,thumbnail_url,permalink'
+  })
   const igCache = '/tmp/igMedia.json'
   writeFileSync(igCache, JSON.stringify(resp))
   console.log('user media', resp)
   t.pass()
 })
 
-test('Get User Media Web', async (t) => {
-  const resp = await svc.getUserMediaWeb({
-    username: process.env.IG_OTHER_USER
+test.only('Get All User Media', async (t) => {
+  const resp = await svc.geAllUserMedia({
+    user_id: authResp.user_id,
+    access_token: authResp.access_token_long,
+    fields: 'id,caption,timestamp,media_url,thumbnail_url,permalink'
   })
-  const igCache = '/tmp/swimwearlicious_igMedia_12.json'
+  const igCache = '/tmp/igMedia_all.json'
   writeFileSync(igCache, JSON.stringify(resp))
   console.log('user media', resp)
   t.pass()
 })
 
-test.only('Get All User Media Web', async (t) => {
+/* ------ Works with a BUT.... ---- */
+// Works as of 05/09/2020 but may not be reliable or may get
+// rate limited...this uses the IG web api.
+// (Plus, the official api appears to faster)
+test('Get User Media Web', async (t) => {
+  const username = process.env.IG_OTHER_USER
+  const resp = await svc.getUserMediaWeb({ username })
+  const igCache = `/tmp/${username}_igMedia_12.json`
+  writeFileSync(igCache, JSON.stringify(resp))
+  console.log('user media', resp)
+  t.pass()
+})
+
+test('Get All User Media Web', async (t) => {
   const username = process.env.IG_OTHER_USER
   const resp = await svc.getAllUserMediaWeb({
     username
@@ -113,15 +130,5 @@ test.only('Get All User Media Web', async (t) => {
   const igCache = `/tmp/${process.env.IG_OTHER_USER}_igMedia_all.json`
   writeFileSync(igCache, JSON.stringify(resp))
   console.log('user media', resp.length)
-  t.pass()
-})
-
-test('Get All User Media', async (t) => {
-  const query = Object.assign({}, authResp)
-  query.fields = 'id,caption,timestamp,media_url,thumbnail_url,permalink'
-  const resp = await svc.geAllUserMedia(query)
-  const igCache = '/tmp/igMedia_all.json'
-  writeFileSync(igCache, JSON.stringify(resp))
-  console.log('user media', resp)
   t.pass()
 })
