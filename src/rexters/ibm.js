@@ -23,7 +23,7 @@ function Svc() {
   return Object.freeze({
     identifiableLanguages() {
       return ibmRexter.get({
-        path: `/v3/identifiable_languages?version=2018-05-01`,
+        url: `${WATSON_ENDPOINT}/v3/identifiable_languages?version=2018-05-01`,
         options: {
           auth: `apikey:${WATSON_API_KEY}`,
           outputFmt: 'json',
@@ -34,7 +34,7 @@ function Svc() {
     supportedLangs({ src = 'en' }) {
       console.log('getting supported langs from IBM')
       return ibmRexter.get({
-        path: `/v3/models?version=2018-05-01`,
+        url: `${WATSON_ENDPOINT}/v3/models?version=2018-05-01`,
         options: {
           auth: `apikey:${WATSON_API_KEY}`,
           outputFmt: 'json',

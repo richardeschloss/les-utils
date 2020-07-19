@@ -1,6 +1,6 @@
 {
   "name": "les-utils",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Utilities used by lesky",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,6 @@
     "build": "babel src -d dist",
     "test:cov": "npm run test:unit:cov && npm run test:e2e:cov",
     "test:watch": "TEST=specs ava --watch",
-    "test:e2e:watch": "ava --config e2e.config.js --colors --watch",
-    "test:e2e:cov": "nyc --no-clean ava --config e2e.config.js --colors",
     "test:unit": "TEST=specs ava --config unit.config.js --colors",
     "test:unit:watch": "TEST=specs ava --config unit.config.js --colors --watch",
     "test:unit:cov": "TEST=specs nyc ava --config unit.config.js --colors",
@@ -49,15 +47,18 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
-    "ava": "^2.4.0",
+    "@ava/babel": "^1.0.1",
+    "@babel/register": "^7.10.5",
+    "ava": "^3.9.0",
     "babel-eslint": "^10.0.3",
-    "eslint": "^6.6.0",
+    "eslint": "^7.0.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-prettier": "^3.1.1",
     "kind-of": ">=6.0.3",
-    "minimist": ">=1.2.3",
-    "nodemon": "^1.19.4",
-    "nyc": "^14.1.1",
+    "lodash": ">=4.17.19",
+    "minimist": "^1.2.5",
+    "nodemon": "^2.0.3",
+    "nyc": "^15.0.1",
     "prettier": "^1.19.1"
   }
 }
