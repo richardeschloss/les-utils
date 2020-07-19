@@ -1,7 +1,10 @@
 import test from 'ava'
 import { LangUtils } from '@/src/language'
 
-const apis = ['ibm', 'yandex']
+const apis = [
+  'ibm',
+  'yandex'
+]
 
 test('Unsupported api', (t) => {
   const api = 'none'
@@ -22,7 +25,6 @@ apis.forEach((api) => {
 
   test(`Supported languages (${api})`, async (t) => {
     const langs = await svc.supportedLangs({})
-    console.log(`Langs (${api})`, langs, langs.length)
     t.true(langs.length > 0)
     t.pass()
   })
@@ -30,7 +32,6 @@ apis.forEach((api) => {
   if (api === 'ibm') {
     test(`Identifiable languages (${api})`, async (t) => {
       const langs = await svc.identifiableLanguages({})
-      console.log(`Langs (${api})`, langs)
       t.true(langs.length > 0)
       t.pass()
     })
@@ -50,7 +51,7 @@ apis.forEach((api) => {
 
     const [{ translation }] = translations
     console.log(`Translation (${api})`, translation)
-    t.true(['¡ Hola mundo!', 'Hola mundo!'].includes(translation))
+    t.true(['¡ Hola mundo!', 'Hola mundo!', '¡Hola mundo!'].includes(translation))
     t.pass()
   })
 
