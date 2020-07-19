@@ -2,6 +2,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] -2020-07-19
+- Security audit (bumped lodash to >=4.17.19)
+
 ## [1.0.3] - 2020-05-05
 - Updated Rexter
 - Updated deps to address security issues.
