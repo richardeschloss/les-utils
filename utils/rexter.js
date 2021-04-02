@@ -267,7 +267,7 @@ function Rexter(cfg = {}) {
       
       const urlObj = urlInstToObj(new URL(url))
       return this.request({
-        path: urlObj.pathname,
+        path: urlObj.pathname + urlObj.search,
         ...urlObj,
         ...options   
       })
@@ -314,6 +314,7 @@ function Rexter(cfg = {}) {
         }
         debug(`rexter.request: ${mergedOpts.protocol}//${mergedOpts.hostname}${mergedOpts.path}`)
         debug('reqOptions', mergedOpts)
+        console.log('mergedOpts', mergedOpts)
         
         const req = proto.request(
           mergedOpts,
