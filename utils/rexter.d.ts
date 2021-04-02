@@ -26,6 +26,13 @@ interface GetOptions extends RequestOptions, StreamOptions {
 
 interface RexterOptions extends GetOptions {
   postData?: object | string;
+  redirectLimit?: number;
+  redirectCnt?: number;
+}
+
+interface BatchReqOptions extends RexterOptions {
+  paths: string | Array<string>;
+  tokens?: Array<any>;
 }
 
 interface PostOptions extends RexterOptions {
@@ -56,6 +63,28 @@ export namespace _ {
   )
   export type handleResp = typeof handleResp;
 
+  /**
+   * For a given template string, treat the strings prefixed with ":"
+   * as tokens, and replace them
+   * 
+   * Return if tokens are undefined or empty
+   * 
+   * Example:
+   * 1. for template = /some/path/:id, tokens = [{id: 123},{id: 456}]
+   * 
+   * Return ['/some/path/123', '/some/path/456']
+   */
+  export function parseTemplate(template: string, tokens: Array<any>): Array<string>;
+  export type parseTemplate = typeof parseTemplate;
+
+  /**
+   * For a given array of relative or absolute paths,
+   * returns the parsed path and, if it's an absolute URL the hostname.
+   * This info then gets passed into the request method.
+   */
+  export function parsePaths(paths: Array<string>): 
+    Array<{ path: string, hostname?: string, protocol?: string, port?: string }>
+  export type parsePaths = typeof parsePaths;
 }
 
 /**
@@ -67,13 +96,52 @@ export type checkEnv = typeof checkEnv;
 
 declare type rexter = Readonly<{
   cookiesValid: () => boolean,
-  get: (url: string, options: GetOptions) => Promise<any>,
-  post: (url: string, options: PostOptions) => Promise<any>,
-  request: (options: RexterOptions) => Promise<any>
+  get: (url: string, options?: GetOptions) => Promise<any>,
+  post: (url: string, options?: PostOptions) => Promise<any>,
+  request: (options: RexterOptions) => Promise<any>,
+  /** 
+   * Perform a batch request using the same set of request options
+   * Examples:
+   * 1. rexter.batch({
+   *   paths: '/some/:id/:token2',
+   *   tokens: [{ id: '111', token2: 'abc' }, { id: '321', token2: 'xyz' }]
+   * })
+   * --> Request ['/some/111/abc', '/some/321/xyz']
+   * 
+   * 2. rexter.batch({
+   *  paths: ['http://someurl1', 'http://someurl2']
+   * })
+   * --> Request ['http://someurl1', 'http://someurl2']
+   * (pass in the hostnames "someurl1" and "someurl2")
+   * 
+   * 3. rexter.batch({
+   *   paths: ['/some/path/1', '/another/path/1']
+   * })
+   * --> Request ['/some/path/1', '/another/path/1']
+   * 
+   * 4) A combination of 1-3:
+   *  rexter.batch({
+   *   paths: ['/some/path/1', '/another/path/1', 'http://someurl1', 'http://someurl2']
+   * })
+   * 
+   * --> Request: [
+   *   '/some/path/1', '/another/path/1',
+   *   'http://someurl1', 'http://someurl2'
+   * ]
+   * 
+   * If the entry contains a protocol "http://" or https://",
+   * parse it into hostname/path parts then pass to rexter.request.
+   * 
+   * If postData is provided, the reqMethod will be 
+   * automatically set to POST. 
+   */
+  batch: (options: BatchReqOptions) => Promise<any>
 }>;
 
 export function Rexter(cfg: {
   hostname?: string;
+  protocol?: string;
+  port?: string;
 }): rexter;
 
 export type Rexter = typeof Rexter

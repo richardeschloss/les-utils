@@ -46,7 +46,7 @@ export type nTimeFn = typeof nextNYears;
 /**
  * Return next N years as a date string
  */
-export function nextNYearStr(n: number, fromDate?: dateT, format?: string): string;
+export function nextNYearStr(n?: number, fromDate?: dateT, format?: string): string;
 export type nTimeFnStr = typeof nextNYearStr;
 
 /**
