@@ -314,7 +314,6 @@ function Rexter(cfg = {}) {
         }
         debug(`rexter.request: ${mergedOpts.protocol}//${mergedOpts.hostname}${mergedOpts.path}`)
         debug('reqOptions', mergedOpts)
-        console.log('mergedOpts', mergedOpts)
         
         const req = proto.request(
           mergedOpts,
