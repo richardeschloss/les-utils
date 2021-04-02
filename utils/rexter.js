@@ -8,6 +8,7 @@ import { promisify } from 'util'
 import { createGunzip } from 'zlib'
 import { URL } from 'url'
 import ProgressBar from 'progress'
+import { Buffer } from 'buffer'
 import csvParse from 'csv-parse/lib/sync.js'
 import { stringify as qStringify } from 'querystring'
 import { parse as parseCookie } from 'cookie'
@@ -60,6 +61,14 @@ const urlInstToObj = (urlInst) => {
     }, {})
 }
 
+const extMap = {
+  'text/plain': '.txt',
+  'text/html': '.html',
+  'application/json': '.json',
+  'video/mp4': '.mp4',
+  'audio/mp4': '.mp4'
+}
+
 /** @type {import('./rexter')._.handleResp}  */
 async function handleResp(res, { 
   dest, 
@@ -83,6 +92,7 @@ async function handleResp(res, {
   const total = parseInt(byteLength)
   let bar
   locals.bytesRxd = 0
+  
   if (progress && byteLength) {
     bar = new ProgressBar('  downloading [:bar] :rate/bps :percent :etas', {
       complete: '=',
@@ -125,7 +135,7 @@ async function handleResp(res, {
     let destDir
     if (!dest) { // If it's falsy, i.e., empty string, build from reqPath
       if (ext === '') {
-        ext = '.' + contentType.split('/')[1]
+        ext = extMap[contentType.split(';')[0]] || ''
       }
       dest = `${fName}${ext}`
       destDir = pResolve(pParse(dest).dir)
@@ -184,9 +194,35 @@ async function handleResp(res, {
   } 
 }
 
+/** @type {import('./rexter')._.parseTemplate}  */
+function parseTemplate(template, tokens) {
+  if (!tokens || tokens.length === 0) return
+  return tokens.map((t) => {
+    return Object.entries(t)
+      .reduce((str, [k, v]) => {
+        return str.replace(`:${k}`, v)
+      }, template)
+  })
+}
+
+/** @type {import('./rexter')._.parsePaths}  */
+function parsePaths(paths) {
+  return paths.map((p) => {
+    const out = { path: p }
+    if (p.startsWith('http')) {
+      const urlObj = new URL(p)
+      out.path = urlObj.pathname
+      out.hostname = urlObj.hostname
+      out.protocol = urlObj.protocol
+      out.port = urlObj.port
+    }
+    return out
+  })  
+}
+
 /** @type {import('./rexter').Rexter}  */
-function Rexter(cfg) {
-  const { hostname } = cfg || {}
+function Rexter(cfg = {}) {
+  const { hostname, protocol, port } = cfg
   let _cookies, _parsedCookies = []
 
   /** @type {import('./rexter')._.cacheCookies} */
@@ -237,26 +273,30 @@ function Rexter(cfg) {
       })
     },
   
-    request({ 
-      dest,
-      locals = {},
-      notify, 
-      postData, 
-      reqTimeout, 
-      transform,
-      progress,
-      writeOptions,
-      ...reqOptions 
-    } = {}) {
+    request(allOpts = {}) {
+      const { 
+        dest,
+        locals = {},
+        notify, 
+        postData, 
+        reqTimeout, 
+        transform,
+        progress,
+        writeOptions,
+        redirectLimit = 3, 
+        ...reqOptions 
+      } = allOpts
+      let { redirectCnt = 0 } = allOpts 
       return new Promise((resolve, reject) => {
         const mergedOpts = { hostname, ...dfltOpts, ...reqOptions }
         const proto = mergedOpts.protocol === 'https:' ? https : http
-        const fullUrl = `${mergedOpts.protocol}//${mergedOpts.hostname}:${mergedOpts.port}/${mergedOpts.path}`
+        const fullUrl = `${mergedOpts.protocol}//${mergedOpts.hostname}:${mergedOpts.port}${mergedOpts.path}`
         if (_cookies) {
           mergedOpts.headers.Cookie = _cookies.join(';')
         }
+
+        // if (postData) mergedOpts.method = 'POST'
         
-        // update req opts HERE
         let postStr
         if (mergedOpts.method === 'POST') { 
           if (!mergedOpts.headers['Content-Type']) {
@@ -274,27 +314,45 @@ function Rexter(cfg) {
         }
         debug(`rexter.request: ${mergedOpts.protocol}//${mergedOpts.hostname}${mergedOpts.path}`)
         debug('reqOptions', mergedOpts)
-
+        
         const req = proto.request(
           mergedOpts,
-          (res) => {
+          async (res) => {
           debug('RESP status', res.statusCode)
           debug('RESP headers', res.headers)
+          // TBD: handle resp headers
           if (res.headers['set-cookie']) {
             cacheCookies(res.headers['set-cookie'])
           }
+
+          // TBD: handle status code 
           if (res.statusCode === 404) {
             reject(new Error('resource not found: ' + fullUrl))
           }
-
+          
           if (res.statusCode === 301) {
-            console.log('301 error...try again at...', res.headers.location)
-            return     
+            const redirect = res.headers.location
+            console.log(`${fullUrl} redirecting to: ${redirect}`)
+            redirectCnt++
+            if (redirectCnt < redirectLimit) {
+              const urlObj = urlInstToObj(new URL(redirect))
+              const resp = await this.request({
+                ...allOpts,
+                ...urlObj,
+                path: urlObj.pathname,
+                redirectCnt
+              }).catch(reject)
+              redirectCnt = 0
+              resolve(resp) 
+            } else {
+              reject(new Error('too many redirects'))
+            }
           }
 
           if (res.statusCode !== 200 
            && res.statusCode !== 206) {
-            reject(res)
+            const { statusCode, headers } = res
+            reject({ statusCode, headers })
           }
 
           handleResp(res, {
@@ -324,23 +382,35 @@ function Rexter(cfg) {
         }
         locals.req = req
       })
-    }
+    },
 
-    // batch({ items, fn, args }) { // TBD
-    // const {
-    //   iteratee = 'items',
-    //   method,
-    //   headers = {},
-    //   notify,
-    //   pathTemplate,
-    //   postDataTemplate,
-    //   transform,
-    //   sequential,
-    //   outputFmt
-    // } = info
-    //   const svc = this
-    //   const p = items.map((item) => svc )
-    // }
+    batch(options) { 
+      const ctx = this
+      const { paths, tokens, ...rest } = options
+      let reqPaths
+      if (typeof paths === 'string') {
+        reqPaths = parseTemplate(paths, tokens) || [paths]
+      } else {
+        reqPaths = paths
+      }
+      const _protocol = protocol, _port = port
+      const p = parsePaths(reqPaths)
+        .map(({ path, hostname, protocol, port }) => {
+          const reqOpts = { 
+            path, 
+            protocol: _protocol, 
+            port: _port, 
+            ...rest 
+          }
+          if (hostname) {
+            reqOpts.hostname = hostname
+            reqOpts.protocol = protocol
+            reqOpts.port = port
+          }
+          return ctx.request(reqOpts)
+        })
+      return Promise.all(p)
+    }
   })
 }
 
