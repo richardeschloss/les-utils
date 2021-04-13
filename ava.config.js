@@ -5,6 +5,7 @@ export default {
   files: [
     'test/array.js',
     'test/datetime.js',
+    'test/files.js',
     'test/format.js',
     'test/model.js',
     'test/network.js',
