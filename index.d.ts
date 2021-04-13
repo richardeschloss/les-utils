@@ -4,6 +4,7 @@
  */
 import ArrayUtils from './utils/array'
 import DateTimeUtils from './utils/datetime'
+import FileUtils from './utils/files'
 import FormatUtils from './utils/format'
 import Model from './utils/model'
 import NetUtils from './utils/network'
@@ -17,6 +18,7 @@ import StringUtils from './utils/string'
 export {
   ArrayUtils,
   DateTimeUtils,
+  FileUtils,
   FormatUtils,
   Model,
   NetUtils,

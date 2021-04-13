@@ -19,3 +19,9 @@ export function gentlyCopy(filesList, dest, opt = {}) {
 
   console.log('= End copying files\n')
 }
+
+const FileUtils = {
+  gentlyCopy   
+}
+
+export default Object.freeze(FileUtils)

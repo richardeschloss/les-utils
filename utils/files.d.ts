@@ -11,3 +11,9 @@ export function gentlyCopy(
 ): void;
 
 export type gentlyCopy = typeof gentlyCopy;
+
+declare const _default: Readonly<{
+  gentlyCopy: gentlyCopy;
+}>;
+
+export default _default
