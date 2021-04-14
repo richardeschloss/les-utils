@@ -69,6 +69,8 @@ export namespace _ {
    * 
    * Return if tokens are undefined or empty
    * 
+   * This is used by the batch method
+   * 
    * Example:
    * 1. for template = /some/path/:id, tokens = [{id: 123},{id: 456}]
    * 
@@ -81,10 +83,31 @@ export namespace _ {
    * For a given array of relative or absolute paths,
    * returns the parsed path and, if it's an absolute URL the hostname.
    * This info then gets passed into the request method.
+   * 
+   * This is used by the batch method
    */
   export function parsePaths(paths: Array<string>): 
     Array<{ path: string, hostname?: string, protocol?: string, port?: string }>
   export type parsePaths = typeof parsePaths;
+
+  /** 
+   * For any postData object, and for a provided set of tokens, where
+   * each token in the postData object is a string prefixed with ":", 
+   * replace the token with the supplied values.
+   * 
+   * This is used by the batch method
+   * 
+   * Example:
+   * const postData = {
+   *   info: ':id'
+   * }
+   * const tokens = [{ id: 123 }, { id: 456 }]
+   * 
+   * This function would return:
+   * [{ info: '123' }, { info: '456' }] 
+   */
+  export function parsePostDataTemplate(postData: any, tokens: Array<any>): Array<string>;
+  export type parsePostDataTemplate = typeof parsePostDataTemplate;
 }
 
 /**
@@ -133,7 +156,11 @@ declare type rexter = Readonly<{
    * parse it into hostname/path parts then pass to rexter.request.
    * 
    * If postData is provided, the reqMethod will be 
-   * automatically set to POST. 
+   * automatically set to POST. For 1-4, the same postData will be sent 
+   * to all request urls.
+   * 
+   * More flexibility may come from the Promise.each and Promise.series methods,
+   * which also have groupBy as an option.  
    */
   batch: (options: BatchReqOptions) => Promise<any>
 }>;

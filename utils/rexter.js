@@ -220,6 +220,18 @@ function parsePaths(paths) {
   })  
 }
 
+/** @type {import('./rexter')._.parsePostDataTemplate}  */
+// function parsePostDataTemplate(postData, tokens) {
+//   const template = JSON.stringify(postData)
+//   return tokens
+//     .map((t) => {
+//       return Object.entries(t)
+//         .reduce((str, [k, v]) => {
+//           return str.replace(`:${k}`, v)
+//         }, template)
+//     })
+// }
+
 /** @type {import('./rexter').Rexter}  */
 function Rexter(cfg = {}) {
   const { hostname, protocol, port } = cfg
@@ -295,7 +307,7 @@ function Rexter(cfg = {}) {
           mergedOpts.headers.Cookie = _cookies.join(';')
         }
 
-        // if (postData) mergedOpts.method = 'POST'
+        if (postData) mergedOpts.method = 'POST'
         
         let postStr
         if (mergedOpts.method === 'POST') { 
@@ -329,6 +341,13 @@ function Rexter(cfg = {}) {
           if (res.statusCode === 404) {
             reject(new Error('resource not found: ' + fullUrl))
           }
+
+          // if (res.statusCode === 403) {
+          //   return handleResp(res, {
+          //     transform: 'string'
+          //   })
+          //   .then(reject)
+          // }
           
           if (res.statusCode === 301) {
             const redirect = res.headers.location
@@ -350,7 +369,7 @@ function Rexter(cfg = {}) {
           }
 
           if (res.statusCode !== 200 
-           && res.statusCode !== 206) {
+           && res.statusCode !== 206 ) {
             const { statusCode, headers } = res
             reject({ statusCode, headers })
           }
@@ -368,7 +387,7 @@ function Rexter(cfg = {}) {
           .catch(reject)
         })
 
-        if (mergedOpts.method === 'POST') { 
+        if (mergedOpts.method === 'POST') {
           req.write(postStr)
         }
         
@@ -387,13 +406,28 @@ function Rexter(cfg = {}) {
     batch(options) { 
       const ctx = this
       const { paths, tokens, ...rest } = options
+      const _protocol = protocol, _port = port
       let reqPaths
       if (typeof paths === 'string') {
         reqPaths = parseTemplate(paths, tokens) || [paths]
+        // TBD: works, but needs test coverage...
+        // if (postData) { // destruct postData from options
+        //   const postStrs = parsePostDataTemplate(postData, tokens)
+        //   const p = postStrs.map((data) => {
+        //     return ctx.post(reqPaths[0], {
+        //       postData: data,
+        //       headers: {
+        //         'Content-Type': 'application/json'
+        //       },
+        //       ...rest 
+        //     })
+        //   })
+        //   return Promise.all(p)
+        // }
       } else {
         reqPaths = paths
       }
-      const _protocol = protocol, _port = port
+      
       const p = parsePaths(reqPaths)
         .map(({ path, hostname, protocol, port }) => {
           const reqOpts = { 
