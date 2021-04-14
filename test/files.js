@@ -1,8 +1,9 @@
 import test from 'ava'
-import { writeFileSync, unlinkSync, readFileSync } from 'fs'
+import { writeFileSync, unlinkSync, readFileSync, mkdirSync } from 'fs'
 import { gentlyCopy } from '../utils/files.js'
 
 test('gentlyCopy', (t) => {
+  mkdirSync('./server/downloads', { recursive: true })
   writeFileSync('./server/downloads/somefile.txt', 'somedata1')
   gentlyCopy(['./server/downloads/somefile.txt'], './server/downloads/somedest1.txt')
   const r1 = readFileSync('./server/downloads/somedest1.txt', { encoding: 'utf-8' })

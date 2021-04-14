@@ -75,8 +75,8 @@ test('fmtDate', (t) => {
 })
 
 test('mergeDateTime', (t) => {
-  const t1 = mergeDateTime("01/11/2021", 2*60*60*1000)
-  t.is(t1.getTime(), new Date("01/12/2021 2:00:00 UTC").getTime())
+  const t1 = mergeDateTime('01/12/2021 UTC', 2*60*60*1000)
+  t.is(t1.getTime(), new Date('01/12/2021 2:00:00 UTC').getTime())
 })
 
 test('nextNQuarters', (t) => {

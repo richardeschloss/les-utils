@@ -7,7 +7,6 @@ import {
   number,
   percentage
 } from '../utils/format.js'
-import { fmtDate } from '../utils/datetime.js'
 
 test('currency', (t) => {
   const tests = [
@@ -62,11 +61,16 @@ test('date', (t) => {
     if (typeof (val) === 'string') {
       // @ts-ignore
       t.is(val, tests[idx].val)
+      t.is(fmt, tests[idx].fmt)
     } else {
       t.is(val.getTime(), tests[idx].val.getTime())
       t.is(val.getTime(), tests[idx].epochTime)
+      if (val.getTime() === 0) {
+        t.true(['12/31/1969', '01/01/1970'].includes(fmt))
+      } else {
+        t.is(fmt, tests[idx].fmt)
+      }
     }
-    t.is(fmt, tests[idx].fmt)
   })
   t.pass()
 })
