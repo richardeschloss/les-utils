@@ -2,7 +2,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.0.4] -2020-07-19
+## [2.0.0] - 2021-04-12
+- Major changes introduced: upgraded utils to ESM modules (NodeJS native)
+- Added various utils and added type defs
+- Obtained 100% cov on utils
+
+## [1.0.4] - 2020-07-19
 - Security audit (bumped lodash to >=4.17.19)
 
 ## [1.0.3] - 2020-05-05
