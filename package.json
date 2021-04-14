@@ -10,8 +10,8 @@
     "test:cov": "c8 ava --timeout=10m"
   },
   "files": [
+    "index.d.ts",
     "index.js",
-    "types",
     "utils"
   ],
   "repository": {
