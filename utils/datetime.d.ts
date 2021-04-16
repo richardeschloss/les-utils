@@ -108,6 +108,7 @@ declare const DateTimeUtils: Readonly<{
     nextNMonths: nTimeFn;
     nextNYears: nTimeFn;
     nextNYearStr: nTimeFnStr;
+    prevNDays: nTimeFn;
     prevNQuarters: nTimeFn;
     prevNMonths: nTimeFn;
     prevNYears: nTimeFn;

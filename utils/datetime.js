@@ -146,6 +146,13 @@ export function prevNQuarters(n = 1, fromDate = new Date()) {
   return new Date(prevYear, prevQuarterMonth, 15)
 }
 
+/** @type {import("./datetime").nTimeFn} */
+export function prevNDays(n) {
+  const today = new Date()
+  const prevDays = new Date().setDate(today.getDate() - n)
+  return new Date(prevDays)
+}
+
 /** @type {import("./datetime").todayStr} */
 export const todayStr = (format) => fmtDate(today(), format)
 
@@ -162,6 +169,7 @@ const DateTimeUtils = Object.freeze({
   nextNMonths,
   nextNYears,
   nextNYearStr,
+  prevNDays,
   prevNQuarters,
   prevNMonths,
   prevNYears,
