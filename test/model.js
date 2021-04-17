@@ -9,6 +9,21 @@ test('Model (bad schema)', (t) => {
   t.is(inst.someNum, 100)
 })
 
+test('Unsupported type', (t) => {
+  const myModel = Model({
+    val: 'noType',
+    val2: 'noType2'
+  }, {
+    val2() {
+      return { val: '321' }
+    }
+  })
+  const inst = myModel({
+    val: '123'
+  })
+  t.is(inst.val, '123')
+})
+
 test('Model (no fieldMap)', (t) => {
   const myModel = Model({
     someNum: 'number',

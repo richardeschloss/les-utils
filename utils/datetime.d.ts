@@ -69,6 +69,11 @@ export function prevNYears(n?: number, fromDate?: dateT): Date;
  */
 export function prevNYearStr(n: number, fromDate?: dateT, format?: string): string;
 
+/**
+ * Return prev N days as a date
+ */
+export function prevNDays(n: number, fromDate?: dateT): Date;
+
 export const msPerDay: 86400000;
 export function today(): Date;
 
