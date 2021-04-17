@@ -5,7 +5,8 @@ import {
   largeCurrency,
   largeNumber,
   number,
-  percentage
+  percentage,
+  string
 } from '../utils/format.js'
 
 test('currency', (t) => {
@@ -169,4 +170,9 @@ test('percentage', (t) => {
   exp.forEach(({ fmt }, idx) => {
     t.is(fmt, tests[idx].fmt)
   })
+})
+
+test('string', (t) => {
+  t.is(string(111), '111')
+  t.is(string('111'), '111')
 })

@@ -291,6 +291,15 @@ export function number(input = 0, opts = {}) {
   return out
 }
 
+/** @type import('./format').stringT */
+export function string(input) {
+  if (typeof input === 'string') {
+    return input
+  } else {
+    return input.toString()
+  }
+}
+
 /** @type import('./format').percentage */
 export function percentage(input = 0, opts = {}) {
   const { precision = 2, scale = 1 } = opts
@@ -326,7 +335,8 @@ const FormatUtils = {
   largeCurrency,
   largeNumber,
   number,
-  percentage
+  percentage,
+  string
 }
 
 export default Object.freeze(FormatUtils)

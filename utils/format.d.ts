@@ -149,12 +149,17 @@ export function percentage(
 ): { val: number, fmt: string };
 export type percentage = typeof percentage;
 
+
+export function string(input: string|number): string;
+export type stringT = typeof string
+
 export default FormatUtils;
 declare const FormatUtils: Readonly<{
   currency: currency;
   date: dateT;
   largeCurrency: largeCurrency;
   largeNumber: largeNumber;
-  number: numberT,
+  number: numberT;
   percentage: percentage;
+  string: stringT;
 }>;

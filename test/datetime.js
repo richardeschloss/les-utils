@@ -9,6 +9,7 @@ import {
   fmtDate,
   mergeDateTime,
   nextNQuarters,
+  prevNDays,
   prevNQuarters,
   nextNMonths,
   nextNYears,
@@ -105,6 +106,11 @@ test('nextNMonths', (t) => {
   t.true(today().getTime() < m1.getTime())
   t.is(m2.toLocaleDateString(), '2/11/2022')
   t.is(m3.toLocaleDateString(), '1/11/2022')
+})
+
+test('prevNDays', (t) => {
+  const m1 = prevNDays(1)
+  t.true(today().getTime() > m1.getTime())
 })
 
 test('prevNMonths', (t) => {
