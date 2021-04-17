@@ -2,6 +2,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2021-04-16
+- Minor updates to datetime and format utils. 
+
 ## [2.0.0] - 2021-04-12
 - Major changes introduced: upgraded utils to ESM modules (NodeJS native)
 - Added various utils and added type defs
