@@ -3,6 +3,7 @@ import ava from 'ava'
 import ExpressServer from '../server/express.js'
 // import { delay } from '../utils/promise.js'
 import Rexter, { checkEnv } from '../utils/rexter.js'
+import { Writable } from 'stream'
 
 const { serial: test, before, after } = ava
 const rexter = Rexter({})
@@ -181,4 +182,44 @@ test('batch', async (t) => {
     transform: 'csv'
   })
   t.is(r4[0].hdr1, 'data1')
+})
+
+test('get pipeline errors', async (t) => {
+  const locals = {}
+  const buf = []
+   await rexter.get(urls.csv0, { 
+    locals,
+    dest: new Writable({
+      write(chunk, encoding, callback) {
+        // buf.push(chunk)
+        // @ts-ignore
+        callback({ code: 'ERR_MY_ERR'})
+      }
+    }),
+    notify(evt, data) {
+      if (evt === 'data') {
+        locals.req.abort()
+      }
+    }
+  }).catch((err) => {
+    t.is(err.code, 'ERR_MY_ERR')
+  })
+
+  const resp = await rexter.get(urls.csv0, { 
+    transform: 'string',
+    locals,
+    dest: new Writable({
+      write(chunk, encoding, callback) {
+        buf.push(chunk)
+        // @ts-ignore
+        callback({ code: 'ERR_STREAM_PREMATURE_CLOSE'})
+      }
+    }),
+    notify(evt, data) {
+      if (evt === 'data') {
+        locals.req.abort()
+      }
+    }
+  })
+  t.true(buf.length > 0)
 })

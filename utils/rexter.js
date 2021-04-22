@@ -180,7 +180,14 @@ async function handleResp(res, {
   }
   streams.push(writable)
   // @ts-ignore
-  await pipeline(...streams)
+  await pipeline(...streams).catch((err) => {
+    const allowCodes = [
+      'ERR_STREAM_PREMATURE_CLOSE' // even if we close prematurely, want to get whatever we buffered.
+    ]
+    if (!allowCodes.includes(err.code)) {
+      throw err
+    }
+  })
 
   if (!dest) {
     const resp = Buffer.concat(buf)
