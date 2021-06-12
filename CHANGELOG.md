@@ -2,6 +2,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.0.3] - 2021-06-11
+- Updated the format utils
+
+## [2.0.2] - 2021-04-21
+- Update to rexter to handle premature close
+
 ## [2.0.1] - 2021-04-16
 - Minor updates to datetime and format utils. 
 

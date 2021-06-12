@@ -1,9 +1,9 @@
 export declare namespace _ {
   /** 
-   * Pre-processes an input that may be a string.
+   * Pre-processes an input that may be non-numeric.
    * Returns the parsed float from the string (i.e., a currency or percentage)
    */
-  export function preProcess(input: string|number): number; 
+  export function preProcess(input: any): number; 
   export type preProcess = typeof preProcess; 
 
   /**
