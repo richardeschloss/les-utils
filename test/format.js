@@ -19,6 +19,7 @@ test('currency', (t) => {
     currency({ val: '-13' }), 
     currency({ val: '(14)' }),
     currency(0),
+    currency({}),
     // @ts-ignore
     currency()
   ]
@@ -30,6 +31,7 @@ test('currency', (t) => {
     { val: 12, fmt: '$12.00' },
     { val: -13, fmt: '-$13.00' },
     { val: -14, fmt: '-$14.00' },
+    { val: 0, fmt: '$0.00' },
     { val: 0, fmt: '$0.00' },
     { val: 0, fmt: '$0.00' }
   ]
@@ -47,21 +49,24 @@ test('date', (t) => {
     date({ val: new Date('01/02/2003'), fmt: '01/02/2003' }),
     date({ val: '01/02/2003' }),
     date({ raw: new Date('01/02/2003') }),
-    date(null)
+    date(null),
+    date({})
   ]
+  
   const exp = [
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
     { val: new Date(0), fmt: '12/31/1969' },
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
-    { val: 'InvalidDate', fmt: 'InvalidDate' }
+    { val: new Date(NaN), fmt: '--' },
+    { val: new Date(NaN), fmt: '--' }
   ]
 
   exp.forEach(({ val, fmt }, idx) => {
-    if (typeof (val) === 'string') {
-      // @ts-ignore
-      t.is(val, tests[idx].val)
+    // @ts-ignore
+    if (isNaN(val.getTime())) {
+      t.true(isNaN(tests[idx].val.getTime()))
       t.is(fmt, tests[idx].fmt)
     } else {
       t.is(val.getTime(), tests[idx].val.getTime())

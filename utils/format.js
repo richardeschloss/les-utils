@@ -13,10 +13,16 @@ const scaleUpUnits = ['K', 'M', 'B', 'T']
  * @type import('./format')._.preProcess
  */
 function preProcess(input) {
+  if (!input) return NaN
   let out = input
   if (typeof out === 'string') {
     const mult = out.match(/[-()]/) ? -1 : 1
     out = parseFloat(out.replace(/[^0-9.]+/g, '')) * mult
+  } else if (
+    typeof out === 'object' &&
+    out.constructor.name !== 'Date'
+  ) {
+    out = parseFloat(input.val)
   }
   return out
 }
@@ -159,7 +165,7 @@ export function currency(input = 0, opts = {}) {
   const out = {
     val: (input.val !== null && input.val !== undefined)
       ? input.val 
-      : input,
+      : preProcess(input),
     fmt: ''
   }
   if (out.val) {
@@ -192,28 +198,23 @@ export function currency(input = 0, opts = {}) {
 export function date(input = Date.now(), opts = {}) {
   const { dateFmt, scale = 1 } = opts
   if (isDate(input)) return input
-
   const out = {
     val: (input !== null && input.val !== undefined && input.val !== null)
-      ? input.val 
-      : input,
+      ? new Date(input.val)
+      : new Date(preProcess(input)),
     fmt: '',
     epochTime: NaN
   }
   
-  if (out.val !== undefined && out.val !== null) {
-    if (typeof out.val === 'string') {
-      out.val = (new Date(out.val))
-    }
-    if (scale && typeof out.val === 'number') {
-      out.val *= scale
+  if (!isNaN(out.val.getTime()) && out.val !== undefined && out.val !== null) {
+    if (scale) {
+      out.val = new Date(out.val.getTime() * scale)
     }
     out.val = new Date(out.val)
     out.fmt = fmtDate(out.val, dateFmt)
     out.epochTime = out.val.getTime()
   } else {
-    out.val = 'InvalidDate'
-    out.fmt = out.val
+    out.fmt = '--'
   }
   return out
 }
@@ -304,19 +305,15 @@ export function string(input) {
 export function percentage(input = 0, opts = {}) {
   const { precision = 2, scale = 1 } = opts
   if (isPercentage(input)) return input
-  const out = {}
-  if (input.val !== undefined && input.val !== null) {
-    out.val = input.val
-  } else if (typeof input === 'object') {
-    out.val = 0
-  } else {
-    out.val = input
+  const out = {
+    val: (input.val !== undefined && input.val !== null)
+      ? input.val
+      : preProcess(input),
+    fmt: ''
   }
-  out.fmt = ''
-  
   if (out.val) {
     if (typeof input === 'string') {
-      out.val = parseFloat(out.val.replace(/[A-z]+/, '0').replace(/%/, ''))
+      out.val = parseFloat(input.replace(/[A-z]+/, '0').replace(/%/, ''))
       if (input.match('%')) {
         out.val /= 100
       }
