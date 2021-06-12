@@ -304,12 +304,15 @@ export function string(input) {
 export function percentage(input = 0, opts = {}) {
   const { precision = 2, scale = 1 } = opts
   if (isPercentage(input)) return input
-  const out = {
-    val: (input.val !== undefined && input.val !== null)
-      ? input.val 
-      : input,
-    fmt: ''
+  const out = {}
+  if (input.val !== undefined && input.val !== null) {
+    out.val = input.val
+  } else if (typeof input === 'object') {
+    out.val = 0
+  } else {
+    out.val = input
   }
+  out.fmt = ''
   
   if (out.val) {
     if (typeof input === 'string') {

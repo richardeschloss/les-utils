@@ -154,6 +154,7 @@ test('percentage', (t) => {
     percentage({ raw: 0.11 }),
     percentage({ val: 0.11, fmt: '11.00%' }),
     percentage({ val: 0.21 }),
+    percentage({}),
     // @ts-ignore
     percentage()
   ]
@@ -165,6 +166,7 @@ test('percentage', (t) => {
     { val: 0.11, fmt: '11.00%' },
     { val: 0.11, fmt: '11.00%' },
     { val: 0.21, fmt: '21.00%' },
+    { val: 0, fmt: '0.00%' },
     { val: 0, fmt: '0.00%' }
   ]
   exp.forEach(({ fmt }, idx) => {
