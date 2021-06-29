@@ -1,5 +1,21 @@
 import test from 'ava'
 import Stats from '../utils/stats.js'
+import { readFileSync } from 'fs'
+import csvParse from 'csv-parse/lib/sync.js'
+
+test('rsi', (t) => {
+  const contents = readFileSync('./server/static/rsi.csv', { encoding: 'utf-8' })
+  const input = csvParse(contents, { columns: true })
+  const inputArr = input.map(({ Close }) => Close)
+  const expectedRSI = input.map((entry) => entry['14-day RSI'])
+  const lastRSI = parseFloat(input[input.length-1]['14-day RSI'])
+  const myRSI = Stats.rsi(inputArr)
+  const myLastRSI = myRSI[myRSI.length - 1] 
+  
+  t.is(myRSI.length, expectedRSI.length)
+  t.true(Math.abs(lastRSI - myLastRSI) < 0.1)
+})
+
 
 test('deltas', (t) => {
   const arr = [1,2,4,7]

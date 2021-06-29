@@ -19,6 +19,11 @@ export function controlStats(arr: number[], { period, factor }?: {
 };
 export type controlStats = typeof controlStats;
 
+export function rsi(arr: number[], { period }?: {
+    period?: number;
+}): number[];
+export type rsi = typeof rsi;
+
 export type numArrToNum = (arr: number[]) => number;
 
 export const mean: numArrToNum;
@@ -30,5 +35,6 @@ declare var _default: Readonly<{
     mean: numArrToNum;
     stddev: numArrToNum;
     sum: numArrToNum;
+    rsi: rsi;
 }>;
 export default _default;

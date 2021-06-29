@@ -4,7 +4,7 @@ export function deltas(arr) {
 }
 
 /** @type {import('./stats').controlStats} */
-export function controlStats(arr, { period = 14, factor = 2 } = {}) {
+export function controlStats(arr, { period = 20, factor = 2 } = {}) {
   const out = {
     mean: Array(period).fill(0),
     ucl: Array(period).fill(0),
@@ -12,7 +12,7 @@ export function controlStats(arr, { period = 14, factor = 2 } = {}) {
   }
   
   arr.slice(period).forEach((_, idx) => {
-    const subset = arr.slice(idx - period, idx)
+    const subset = arr.slice(idx, idx + period)
     const subsetStdev = stddev(subset)
     const _mean = mean(subset)
     const _ucl = _mean + factor * subsetStdev
@@ -38,6 +38,40 @@ export function stddev(arr) {
     : 0
 }
 
+export function rsi(arr, { period = 14 } = {}) {
+  const gains = [0], loss = [0], rsis = [0]
+  let prevAvgG, prevAvgL, avgG, avgL, gSubset, lSubset
+  return arr.map((_, idx) => {
+    if (idx === 0) return 0
+    const delta = arr[idx] - arr[idx-1]
+    if (delta > 0) {
+      gains.push(delta)
+      loss.push(0)
+    } else {
+      gains.push(0)
+      loss.push(delta)
+    }
+    
+    if (idx >= period) {      
+      if (idx - period === 0) {
+        gSubset = gains.slice(idx - period, idx)
+        lSubset = loss.slice(idx - period, idx)
+        avgG = mean(gSubset)
+        avgL = mean(lSubset)
+      } else {
+        avgG = ((avgG * (period - 1)) + gains[idx]) / period
+        avgL = ((avgL * (period - 1)) + loss[idx]) / period
+      }
+      
+      if (avgL === 0) return 100
+
+      return 100 - (100 / ( 1 + Math.abs(avgG / avgL)))
+    } else {
+      return 0
+    }
+  })
+}
+
 /** @type {import('./stats').numArrToNum} */
 export const sum = (arr) => arr.reduce((cum, val) => (cum += val), 0)
 
@@ -46,7 +80,8 @@ const Stats = {
   controlStats,
   mean,
   stddev,
-  sum 
+  sum,
+  rsi 
 }
 
 export default Object.freeze(Stats)
