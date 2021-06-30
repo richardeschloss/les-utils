@@ -11,8 +11,9 @@ export function controlStats(arr, { period = 20, factor = 2 } = {}) {
     lcl: Array(period).fill(0)
   }
   
-  arr.slice(period).forEach((_, idx) => {
-    const subset = arr.slice(idx, idx + period)
+  arr.forEach((_, idx) => {
+    if (idx < period) return
+    const subset = arr.slice(idx - period, idx)
     const subsetStdev = stddev(subset)
     const _mean = mean(subset)
     const _ucl = _mean + factor * subsetStdev

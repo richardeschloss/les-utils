@@ -43,7 +43,7 @@ test('stddev', (t) => {
   t.is(Stats.stddev(arr), 2)
 })
 
-test('controlStats (also tests sum, mean, stdev)', (t) => {
+test.only('controlStats (also tests sum, mean, stdev)', (t) => {
   const arr = [1,2,4,7,4,2,3,4]
   const out = Stats.controlStats(arr, { period: 2 })
   // console.log('out', out)
