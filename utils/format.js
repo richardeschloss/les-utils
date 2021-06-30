@@ -70,6 +70,7 @@ function isDate(input) {
     input.val = input.raw
   }
   if (
+    typeof input === 'string' ||
     typeof input !== 'object' ||
     !isDateFn(input.val) ||
     typeof input.fmt !== 'string'
@@ -198,6 +199,9 @@ export function currency(input = 0, opts = {}) {
 export function date(input = Date.now(), opts = {}) {
   const { dateFmt, scale = 1 } = opts
   if (isDate(input)) return input
+  if (typeof input === 'string') {
+    input = new Date(input)
+  }
   const out = {
     val: (input !== null && input.val !== undefined && input.val !== null)
       ? new Date(input.val)

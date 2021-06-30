@@ -44,6 +44,7 @@ test('currency', (t) => {
 
 test('date', (t) => {
   const tests = [
+    date('Tue, 29 Jun 2021 16:00:00 +0000'),
     date(new Date('01/02/2003')),
     date({ val: 0 }),
     date({ val: new Date('01/02/2003'), fmt: '01/02/2003' }),
@@ -54,6 +55,7 @@ test('date', (t) => {
   ]
   
   const exp = [
+    { val: new Date('Tue, 29 Jun 2021 16:00:00 +0000'), fmt: '06/29/2021' },
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
     { val: new Date(0), fmt: '12/31/1969' },
     { val: new Date('01/02/2003'), fmt: '01/02/2003' },
