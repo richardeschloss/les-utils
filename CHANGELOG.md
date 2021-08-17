@@ -2,6 +2,9 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.0.4] - 2021-08-17
+- Added rsi and bb to stat utils
+
 ## [2.0.3] - 2021-06-11
 - Updated the format utils
 
