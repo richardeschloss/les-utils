@@ -14,6 +14,8 @@ test('rsi', (t) => {
   
   t.is(myRSI.length, expectedRSI.length)
   t.true(Math.abs(lastRSI - myLastRSI) < 0.1)
+  const gOnly = Stats.rsi([1, 1], { period: 1 })
+  t.is(gOnly[0], 0)
 })
 
 
@@ -41,9 +43,10 @@ test('mean', (t) => {
 test('stddev', (t) => {
   const arr = [1,5]
   t.is(Stats.stddev(arr), 2)
+  t.is(Stats.stddev([]), 0)
 })
 
-test.only('controlStats (also tests sum, mean, stdev)', (t) => {
+test('controlStats (also tests sum, mean, stdev)', (t) => {
   const arr = [1,2,4,7,4,2,3,4]
   const out = Stats.controlStats(arr, { period: 2 })
   // console.log('out', out)

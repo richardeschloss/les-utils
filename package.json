@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "ava",
-    "test:watch": "ava --watch --timeout=10m",
-    "test:cov": "c8 ava --timeout=10m"
+    "test:watch": "ava --watch",
+    "test:cov": "c8 ava"
   },
   "files": [
     "index.d.ts",

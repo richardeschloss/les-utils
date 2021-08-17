@@ -5,6 +5,5 @@ export default {
   files: ['test/*.js'],
   tap: false,
   verbose: true,
-  watch: true,
   timeout: '10m'
 }
