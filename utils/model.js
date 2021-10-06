@@ -50,7 +50,7 @@ function Model(schema, populate = {}) {
     })
     Object.entries(populate).forEach(([field, fn]) => {
       const { val, opts = {} } = fn(out) || {}
-      if (val) {
+      if (val !== undefined) {
         const type = schema[field].type || schema[field]
         const cast = FormatUtils[type]
         out[field] = cast 
