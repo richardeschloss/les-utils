@@ -15,8 +15,8 @@ export function camelCase (str) {
 
 /** @type {import('./string').stringTostring} */
 export const startCase = (str) => 
-    str[0].toUpperCase() 
-  + str.slice(1)
+  ( str[0].toUpperCase() 
+  + str.slice(1) ).replace(/([a-z])([A-Z])/g, '$1 $2')
 
 /** @type {import('./string').parseXML} */
 export function parseXML(xml) {
