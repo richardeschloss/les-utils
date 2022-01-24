@@ -46,7 +46,7 @@ const abbreviateNumber = (input) => {
 /** 
  * @type import('./format')._.isCurrency
  */
-function isCurrency(input, { currencySymbol }) {
+function isCurrency(input, { currencySymbol = '$' }) {
   if (input.raw) {
     input.val = input.raw
   }
@@ -117,7 +117,7 @@ function isLargeNumber(input) {
 /**
  * @type import('./format')._.isCurrency
  */
-function isLargeCurrency(input, { currencySymbol }) {
+function isLargeCurrency(input, { currencySymbol = '$' }) {
   if (input.raw) {
     input.val = input.raw
   }
@@ -155,6 +155,26 @@ function isPercentage(input) {
 }
 
 /* Exports */
+export function getFmt(input) {
+  const fns = [
+    isDate,
+    isPercentage,
+    isLargeCurrency,
+    isCurrency,
+    isLargeNumber,
+    isNumber  
+  ]
+  let type
+  fns.some(fn => {
+    if (fn(input, {})) {
+      type = fn.name.split('is')[1]
+      type = type[0].toLowerCase() + type.slice(1)
+      return true
+    }
+  })
+  return type
+}
+
 /** @type import('./format').currency */
 export function currency(input = 0, opts = {}) {
   const {
