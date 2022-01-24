@@ -1,12 +1,11 @@
 {
   "name": "les-utils",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Utilities used by lesky",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "ava",
-    "test:watch": "ava --watch",
+    "test": "ava --watch",
     "test:cov": "c8 ava"
   },
   "files": [
@@ -35,6 +34,7 @@
     "csv": "^5.4.0",
     "node-netstat": "^1.8.0",
     "progress": "^2.0.3",
+    "stream": "^0.0.2",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
