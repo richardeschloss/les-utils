@@ -26,6 +26,21 @@ export function upsert(arr = [], obj = {}, keyBy = 'symbol') {
   }
 }
 
-const ArrayUtils = { omit, pick, upsert }
+function sortBy(arr, key, valKey) {
+  const copy = [...arr]
+  return copy.sort((a, b) => {
+    const aVal = valKey ? a[key][valKey] : a[key]
+    const bVal = valKey ? b[key][valKey] : b[key]
+    if (aVal > bVal) {
+      return 1
+    } if (aVal < bVal) {
+      return -1
+    } else {
+      return 0
+    }    
+  })
+}
+
+const ArrayUtils = { omit, pick, upsert, sortBy }
 
 export default Object.freeze(ArrayUtils)
