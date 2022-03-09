@@ -26,7 +26,7 @@ export function upsert(arr = [], obj = {}, keyBy = 'symbol') {
   }
 }
 
-function sortBy(arr, key, valKey) {
+export function sortBy(arr, key, valKey) {
   const copy = [...arr]
   return copy.sort((a, b) => {
     const aVal = valKey ? a[key][valKey] : a[key]
