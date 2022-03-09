@@ -1,5 +1,7 @@
-import test from 'ava'
+import ava from 'ava'
 import { upsert, omit, pick, sortBy } from "../utils/array.js"
+
+const { serial: test } = ava
 
 const testArr = [
   {
@@ -43,7 +45,7 @@ test('shall allow array props to be picked', (t) => {
 
 test('shall allow object to be upserted', (t) => {
   const testObj = { symbol: 'BBB', name: 'New name', data: 'new data' }
-  const testObj2 = { symbol: 'DDD', name: 'Another name' }
+  const testObj2 = { symbol: 'DDD', name: 'Another name', score: { val: 111 } }
   upsert(testArr, testObj)
   const fndIdx = testArr.findIndex(({ symbol }) => symbol === testObj.symbol)
   t.is(testArr[fndIdx].name, testObj.name)

@@ -18,7 +18,7 @@ export type pick = typeof pick;
 export function upsert(arr?: any[], obj?: Object, keyBy?: string): void;
 export type upsert = typeof upsert;
 
-export function sortBy(arr?: any[], key: string, valKey?: string): any[];
+export function sortBy(arr: any[], key: string, valKey?: string): any[];
 export type sortBy = typeof sortBy;
 
 declare var _default: Readonly<{
