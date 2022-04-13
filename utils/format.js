@@ -253,8 +253,8 @@ export function largeCurrency(input = 0, opts = {}) {
   if (isLargeCurrency(input, { currencySymbol })) return input
   const out = {
     val: (input.val !== undefined && input.val !== null)
-      ? input.val 
-      : parseFloat(input),
+      ? input.val
+      : preProcess(input),
     fmt: ''
   }
   if (out.val) {

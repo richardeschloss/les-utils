@@ -91,7 +91,8 @@ test('largeCurrency', (t) => {
     largeCurrency({ val: 200, fmt: '$200.00' }),
     largeCurrency({ val: 3000, fmt: '$3K'}),
     // @ts-ignore
-    largeCurrency()
+    largeCurrency(),
+    largeCurrency('2,123')
   ]
   const exp = [
     { val: 4320022222, fmt: '$4.32 B' },
@@ -99,7 +100,8 @@ test('largeCurrency', (t) => {
     { val: 100, fmt: '$100.00'},
     { val: 200, fmt: '$200.00'},
     { val: 3000, fmt: '$3K'},
-    { val: 0, fmt: '$0.00'}
+    { val: 0, fmt: '$0.00'},
+    { val: 2123, fmt: '$2.12 K'}
     
   ]
   exp.forEach(({ val, fmt }, idx) => {
