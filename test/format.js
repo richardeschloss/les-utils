@@ -114,12 +114,14 @@ test('largeNumber', (t) => {
   const tests = [
     largeNumber('4320022222'),
     largeNumber({ val: 1234, fmt: '1.23 K' }),
-    largeNumber('-1234')  
+    largeNumber('-1234'),
+    largeNumber({ raw: 75427776, fmt: '75.428M', longFmt: '75,427,776' })  
   ]
   const exp = [
     { val: 4320022222, fmt: '4.32 B' },
     { val: 1234, fmt: '1.23 K' },
-    { val: -1234, fmt: '-1.23 K' }
+    { val: -1234, fmt: '-1.23 K' },
+    { val: 75427776, fmt: '75.428M' }
   ]
   exp.forEach(({ val, fmt }, idx) => {
     t.is(val, tests[idx].val)

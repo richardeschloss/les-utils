@@ -103,6 +103,9 @@ function isNumber(input) {
  * @type import('./format')._.isNumber
  */
 function isLargeNumber(input) {
+  if (input.raw) {
+    input.val = input.raw
+  }
   if (
     typeof input !== 'object' ||
     typeof input.val !== 'number' ||
