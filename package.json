@@ -1,6 +1,6 @@
 {
   "name": "les-utils",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "Utilities used by lesky",
   "main": "index.js",
   "type": "module",
